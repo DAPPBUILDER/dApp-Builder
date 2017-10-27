@@ -1,0 +1,25 @@
+//
+// Prefix header for all source files of the 'mWebVC' target in the 'mWebVC' project
+//
+
+#ifdef __OBJC__
+  #import <Foundation/Foundation.h>
+
+#define resourceFromBundle(_resource_name_) (@"mWebVCResources.bundle/" _resource_name_)
+
+#undef thisBundle
+#define thisBundle [NSBundle bundleWithPath:[[[NSBundle mainBundle] resourcePath] \
+                      stringByAppendingPathComponent:@"mWebVCResources.bundle"]]
+
+#undef SLBundlePluralizedString
+#define SLBundlePluralizedString(key, n, comment) \
+                  SLPluralizedStringFromTableInBundle(key, nil, thisBundle, n, comment)
+
+#undef NSBundleLocalizedString
+#define NSBundleLocalizedString(key, comment) \
+                [thisBundle localizedStringForKey:(key) \
+                                            value:@"" \
+                                            table:nil]
+
+
+#endif
