@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="romanblack_html_cannot_init">Cannot initialize Web plugin.</string>
+
+    <string name="romanblack_html_send_email">Send mail...</string>
+    <string name="romanblack_html_loading">Loading...</string>
+    <string name="romanblack_html_web">Web</string>
+
+    <string name="romanblack_html_alert_no_internet">Cellular Data is Turned off. Turn on cellular data or use Wi-Fi to
+        access data
+    </string>
+    <string name="romanblack_html_no_video_player">No app installed to play this video</string>
+    <string name="location_dialog_title">Locations</string>
+    <string name="location_dialog_description">Would like to use your Current Location</string>
+    <string name="location_dialog_allow">Allow</string>
+    <string name="location_dialog_not_allow">Don\'t Allow</string>
+    <string name="notification_error_ssl_cert_invalid">SSL error occurred. Would you like to proceed?</string>
+    <string name="wp_cancel">Cancel</string>
+    <string name="wp_continue">Continue</string>
+
+</resources>

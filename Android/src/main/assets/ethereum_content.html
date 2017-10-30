@@ -1,0 +1,292 @@
+<style>
+#ibuildapp-dapps-login-form, #ibuildapp-dapps-signup-form, #ibuildapp-dapps-transaction-form, #ibuildapp-dapps-panel {
+ display:none;
+ box-sizing:border-box;
+ padding:15px;
+ background:white;
+ position:fixed;
+ width:100%;
+ height:100%;
+ top:0;
+ left:0;
+ z-index:1000000;
+ text-align:center;
+ background-color:#0b2d54;
+ color:white;
+ text-align:center;
+ overflow:scroll;
+}
+#ibuildapp-dapps-login-form input[type="submit"], #ibuildapp-dapps-signup-form input[type="submit"], #ibuildapp-dapps-transaction-form input[type="submit"] {
+ background:#00d9ff;
+ color:white;
+ line-height:40px;
+ border-radius:20px;
+ border:0;
+ outline:0;
+ margin:0;
+ padding:0;
+ cursor:pointer;
+ font-size:15px;
+ margin-bottom:10px;
+ text-align:center;
+ width:100%;
+}
+#ibuildapp-dapps-login-form h2, #ibuildapp-dapps-signup-form h2, #ibuildapp-dapps-transaction-form h2 {
+ color:white;
+ border:0;
+ outline:0;
+ margin:0;
+ padding:0;
+ font-size:32px;
+ padding-bottom:15px;
+ text-align:center;
+}
+#ibuildapp-dapps-login-form p, #ibuildapp-dapps-signup-form p, #ibuildapp-dapps-transaction-form p {
+ margin:0;
+ padding:0;
+ padding-bottom:15px;
+ text-align:center;
+}
+#ibuildapp-dapps-login-form input[type="text"], #ibuildapp-dapps-signup-form input[type="text"], #ibuildapp-dapps-transaction-form input[type="text"], #ibuildapp-dapps-login-form input[type="password"], #ibuildapp-dapps-signup-form input[type="password"], #ibuildapp-dapps-transaction-form input[type="password"], #ibuildapp-dapps-login-form select, #ibuildapp-dapps-signup-form select, #ibuildapp-dapps-transaction-form select {
+ background:white;
+ color:black;
+ line-height:40px;
+ border-radius:5px;
+ border:0;
+ outline:0;
+ margin:0;
+ padding:0;
+ font-size:15px;
+ margin-bottom:10px;
+ height:40px;
+ width:100%;
+ text-align:center;
+}
+#ibuildapp-dapps-button{
+ position:fixed;
+ left:0;
+ bottom:0;
+ background:#0b2d54;
+ z-index:999999;
+ width:30px;
+ height:30px;
+ cursor:pointer;
+ border-radius: 0px 6px 0px 0px;
+}
+#ibuildapp-dapps-button img{
+ width:100%;
+}
+</style>
+<form onsubmit="walletLogin();return false;" id="ibuildapp-dapps-login-form">
+    <h2>Sign into your wallet</h2>
+    <select id="ibuildapp-dapps-account-select" required></select>
+    <input id="ibuildapp-dapps-account-password" placeholder="Password" type="password" required>
+    <input type="submit" value="Login">
+    <span style="cursor:pointer;" onclick="showCreatePopup();">Create new wallet</span>
+</form>
+<form onsubmit="walletCreate();return false;" id="ibuildapp-dapps-signup-form">
+    <h2>Create new wallet</h2>
+    <input id="ibuildapp-dapps-account-password-new" placeholder="Password" type="password" required>
+    <input type="submit" value="Create">
+    <span style="cursor:pointer;" id="ibuildapp-dapps-choose-account" onclick="showLoginPopup();">Already have an account</span>
+</form>
+<form onsubmit="ibuildappSendTransaction();return false;" id="ibuildapp-dapps-transaction-form">
+    <h2>Transaction</h2>
+    <input id="ibuildapp-dapps-transaction-to" type="hidden">
+    <input id="ibuildapp-dapps-transaction-data" type="hidden">
+    <input id="ibuildapp-dapps-transaction-value" type="hidden">
+    <p>Gas Price (Gwei):</p>
+    <input id="ibuildapp-dapps-transaction-gasprice" placeholder="Gas Price" type="text" value="100" required>
+    <p>Gas Limit:</p>
+    <input id="ibuildapp-dapps-transaction-gaslimit" placeholder="Gas Limit" type="text" value="100000" required>
+    <input type="submit" value="Submit">
+    <span style="cursor:pointer;" onclick="hideTransactionPopup();">Reject</span>
+</form>
+<div id="ibuildapp-dapps-button" onclick="showAccountPopup();"><img src="https://dapps.ibuildapp.com/widget/icon.png"></div>
+<div id="ibuildapp-dapps-panel">
+    <h2>Your account</h2>
+    <p id="dapps-ibuildapp-account"></p>
+    <p><a id="dapps-ibuildapp-account-link" href="">You on Etherscan</a></p>
+    <p>Balance: <span id="dapps-ibuildapp-account-balance"></span> ETH</p>
+    <span style="cursor:pointer;" onclick="hideAccountPopup();">Close</span>
+    <h2>Transactions:</h2>
+    <div id="dapps-ibuildapp-transactions"></div>
+</div>
+<script type="text/javascript">
+ var dapp_callback;
+    window.addEventListener('load', function() {
+  showDappsPopup();
+  web3.eth.sendTransaction = function(tx, callback = null){
+   window.dapp_callback = callback;
+   document.getElementById("ibuildapp-dapps-transaction-to").value = tx.to;
+   document.getElementById("ibuildapp-dapps-transaction-data").value = tx.data;
+   if (typeof tx.value !== "undefined" && tx.value) document.getElementById("ibuildapp-dapps-transaction-value").value = tx.value;
+   showTransactionPopup();
+  };
+ });
+
+ function showDappsPopup() {
+  var accounts = iba.loadAllAccounts();
+  if (accounts) {
+   accounts = JSON.parse(accounts);
+   accounts.forEach(function(item, i, arr) {
+    var option = document.createElement('option');
+    option.innerHTML = item;
+    option.setAttribute('value', item);
+    document.getElementById("ibuildapp-dapps-account-select").appendChild(option);
+   });
+   showLoginPopup();
+  } else {
+   document.getElementById("ibuildapp-dapps-choose-account").style.display = 'none';
+   showCreatePopup();
+  }
+ }
+
+ function showLoginPopup() {
+  hideCreatePopup();
+  var loginForm = document.getElementById("ibuildapp-dapps-login-form");
+  loginForm.style.display = 'block';
+ }
+
+ function hideLoginPopup() {
+  var loginForm = document.getElementById("ibuildapp-dapps-login-form");
+  loginForm.style.display = 'none';
+ }
+
+ function showCreatePopup() {
+  hideLoginPopup();
+  var createForm = document.getElementById("ibuildapp-dapps-signup-form");
+  createForm.style.display = 'block';
+ }
+
+ function hideCreatePopup() {
+  var createForm = document.getElementById("ibuildapp-dapps-signup-form");
+  createForm.style.display = 'none';
+ }
+
+ function showTransactionPopup() {
+  var transactionForm = document.getElementById("ibuildapp-dapps-transaction-form");
+  transactionForm.style.display = 'block';
+ }
+
+ function hideTransactionPopup() {
+  var transactionForm = document.getElementById("ibuildapp-dapps-transaction-form");
+  transactionForm.style.display = 'none';
+ }
+
+ function showAccountPopup() {
+  var accountBlock = document.getElementById("ibuildapp-dapps-panel");
+  accountBlock.style.display = 'block';
+ }
+
+ function hideAccountPopup() {
+  var accountBlock = document.getElementById("ibuildapp-dapps-panel");
+  accountBlock.style.display = 'none';
+ }
+
+ function ibuildappSendTransaction() {
+  var tx = {};
+  var to = document.getElementById("ibuildapp-dapps-transaction-to").value;
+  var data = document.getElementById("ibuildapp-dapps-transaction-data").value;
+  var gasLimit = document.getElementById("ibuildapp-dapps-transaction-gaslimit").value;
+  var gasPrice = parseInt(document.getElementById("ibuildapp-dapps-transaction-gasprice").value) * 1000000000;
+  var nonce = web3.eth.getTransactionCount(web3.eth.defaultAccount);
+   var val = document.getElementById("ibuildapp-dapps-transaction-value").value;
+   var value;
+   if (val) value = val;
+   else value = 0;
+
+    var result = iba.signTransaction(to, data, gasLimit, gasPrice, nonce, value);
+    if (result != 'ERROR')
+        onSuccess(result)
+
+ }
+
+ function walletLogin() {
+  var account = document.getElementById("ibuildapp-dapps-account-select").value;
+  var password = document.getElementById("ibuildapp-dapps-account-password").value;
+  var accountAddress = iba.login(account, password);
+	if(accountAddress == 'ERROR')
+	errorLogin()
+	else {
+	var transactionsList = iba.getAllTransactions();
+    setTransactionList(transactionsList);
+
+	successLogin(accountAddress)
+	}
+ }
+
+ function walletCreate() {
+  var password = document.getElementById("ibuildapp-dapps-account-password-new").value;
+  var accountAddress = iba.loginCreate(password);
+  if(accountAddress == 'ERROR')
+errorLogin()
+else
+successLogin(accountAddress)
+ }
+
+ function successLogin(account) {
+  web3.eth.defaultAccount = account;
+  document.getElementById("dapps-ibuildapp-account").innerHTML = account;
+  document.getElementById("dapps-ibuildapp-account-link").setAttribute('href', 'https://rinkeby.etherscan.io/address/' + account);
+  document.getElementById("dapps-ibuildapp-account-balance").innerHTML = parseFloat(web3.eth.getBalance(account)) / 1000000000000000000;
+
+  hideCreatePopup();
+  hideLoginPopup();
+
+ }
+
+ function errorLogin() {
+  alert('Incorrect password!');
+ }
+
+ function openCustomURLinIFrame(src) {
+  var rootElm = document.documentElement;
+  var newFrameElm = document.createElement("IFRAME");
+  newFrameElm.setAttribute("src",src);
+  rootElm.appendChild(newFrameElm);
+  newFrameElm.parentNode.removeChild(newFrameElm);
+ }
+
+ function calliOSFunction(functionName, args, successCallback, errorCallback) {
+  var url = "ibuildapp://json/";
+
+  var callInfo = {};
+  callInfo.functionname = functionName;
+  if (successCallback) {
+   callInfo.success = successCallback;
+  }
+  if (errorCallback) {
+   callInfo.error = errorCallback;
+  }
+  if (args) {
+   callInfo.args = args;
+  }
+
+  url += "json?" + JSON.stringify(callInfo);
+
+  openCustomURLinIFrame(url);
+ }
+
+ function onSuccess(ret) {
+    hideTransactionPopup();
+    web3.eth.sendRawTransaction(ret, window.dapp_callback);
+
+    var transactionsList = iba.getAllTransactions();
+    setTransactionList(transactionsList);
+ }
+
+ function onError(ret) {
+ }
+
+function setTransactionList(json) {
+  transactions = JSON.parse(json);
+  document.getElementById("dapps-ibuildapp-transactions").innerHTML = '';
+  transactions.forEach(function(item, i, arr) {
+   var tx = document.createElement('p');
+   tx.innerHTML = item;
+   tx.setAttribute('onclick', 'location.href="https://rinkeby.etherscan.io/tx/' + item + '";');
+   document.getElementById("dapps-ibuildapp-transactions").appendChild(tx);
+  });
+ }
+</script>

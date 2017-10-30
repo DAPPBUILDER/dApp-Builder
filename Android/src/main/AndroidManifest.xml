@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ibuildapp.romanblack.WebPlugin">
+
+    <application>
+        <activity
+            android:name="WebPlugin"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:hardwareAccelerated="true" />
+    </application>
+
+</manifest>
