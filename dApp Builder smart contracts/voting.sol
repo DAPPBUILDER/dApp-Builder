@@ -22,6 +22,10 @@ contract ibaVoter {
         address votedPerson,
         uint256 proposalIndex
         );
+        
+    event Finish(
+        bool finished
+        );
 
     mapping (address => mapping(uint256 => mapping(address => votedData))) votedDatas;
     mapping (address => mapping(uint256 => address[])) voted;
@@ -131,6 +135,7 @@ contract ibaVoter {
             if (ballots[msg.sender][i].name == ballot) {
                 if (ballots[msg.sender][i].chainperson == msg.sender){
                     ballots[msg.sender][i].finished = true;
+                    Finish(true);
                     return true;
                 } else {
                     return false;
