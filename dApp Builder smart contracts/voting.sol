@@ -17,6 +17,15 @@ contract ibaVoter {
         uint256 proposal;
         bool isVal;
     }
+    
+    event Vote(
+        address votedPerson,
+        uint256 proposalIndex
+        );
+        
+    event Finish(
+        bool finished
+        );
 
     mapping (address => mapping(uint256 => mapping(address => votedData))) votedDatas;
     mapping (address => mapping(uint256 => address[])) voted;
@@ -108,6 +117,7 @@ contract ibaVoter {
         voted[chainperson][ballot].push(msg.sender);
         voteCount[chainperson][ballot][proposalNum]++;
         votedDatas[chainperson][ballot][msg.sender] = votedData({proposal: proposalNum, isVal: true});
+        Vote(msg.sender, proposalNum);
         return true;
     }
     
@@ -125,11 +135,27 @@ contract ibaVoter {
             if (ballots[msg.sender][i].name == ballot) {
                 if (ballots[msg.sender][i].chainperson == msg.sender){
                     ballots[msg.sender][i].finished = true;
+                    Finish(true);
                     return true;
                 } else {
                     return false;
                 }
             }
         }
+    }
+    
+    function getWinner(address chainperson, uint ballotIndex) public constant returns (bytes32 winnerName){
+            if (ballots[chainperson][ballotIndex].finished == false){
+                revert();
+            }
+            uint256 maxVotes;
+            bytes32 winner;
+            for (uint8 i=0;i<proposals[chainperson][ballotIndex].length;i++){
+                if (voteCount[chainperson][ballotIndex][i]>maxVotes){
+                    maxVotes = voteCount[chainperson][ballotIndex][i];
+                    winner = proposals[chainperson][ballotIndex][i].name;
+                }
+            }
+            return winner;
     }
 }
