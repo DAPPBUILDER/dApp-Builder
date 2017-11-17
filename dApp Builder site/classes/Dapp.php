@@ -35,10 +35,10 @@ class Dapp {
 					return array(
 						'background_color' => '#022c3e',
 						'text_color' => '#ffffff',
-						'links_color' => '#1fe284',
-						'eth_addresses_color' => '',
-						'vote_buttons_color' => '',
-						'finish_button_color' => '',
+						'links_color' => '#aaaaaa',
+						'eth_addresses_color' => '#1fe284',
+						'vote_buttons_color' => '#00aa00',
+						'finish_button_color' => '#aa0000',
 					);
 				default:
 					return false;

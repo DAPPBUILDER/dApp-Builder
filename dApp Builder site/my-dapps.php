@@ -58,35 +58,35 @@ require_once('common/header.php');
 					<h2>Template Settings</h2>
 				</div>
 				<div class="modal-body">
-					<form method="post">
+					<form method="post" class="template-form">
 						<p class="text-center">Background color:</p>
 						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="background-color" type="text" class="form-control input-lg" value="<?php echo $interface['background_color']; ?>" required>
+							<input name="background_color" type="text" class="form-control input-lg" value="<?php echo $interface['background_color']; ?>" required>
 							<span class="input-group-addon"><i></i></span>
 						</div>
 						<p class="text-center">Text color:</p>
 						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="text-color" type="text" class="form-control input-lg" value="<?php echo $interface['text_color']; ?>" required>
+							<input name="text_color" type="text" class="form-control input-lg" value="<?php echo $interface['text_color']; ?>" required>
 							<span class="input-group-addon"><i></i></span>
 						</div>
 						<p class="text-center">Links color:</p>
 						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="links-color" type="text" class="form-control input-lg" value="<?php echo $interface['links_color']; ?>" required>
+							<input name="links_color" type="text" class="form-control input-lg" value="<?php echo $interface['links_color']; ?>" required>
 							<span class="input-group-addon"><i></i></span>
 						</div>
 						<p class="text-center">Ethereum addresses color:</p>
 						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="links-color" type="text" class="form-control input-lg" value="<?php echo $interface['eth_addresses_color']; ?>" required>
+							<input name="eth_addresses_color" type="text" class="form-control input-lg" value="<?php echo $interface['eth_addresses_color']; ?>" required>
 							<span class="input-group-addon"><i></i></span>
 						</div>
 						<p class="text-center">Vote buttons color:</p>
 						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="vote-buttons-color" type="text" class="form-control input-lg" value="<?php echo $interface['vote_buttons_color']; ?>" required>
+							<input name="vote_buttons_color" type="text" class="form-control input-lg" value="<?php echo $interface['vote_buttons_color']; ?>" required>
 							<span class="input-group-addon"><i></i></span>
 						</div>
 						<p class="text-center">Finish button color:</p>
 						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="finish-button-color" type="text" class="form-control input-lg" value="<?php echo $interface['finish_button_color']; ?>" required>
+							<input name="finish_button_color" type="text" class="form-control input-lg" value="<?php echo $interface['finish_button_color']; ?>" required>
 							<span class="input-group-addon"><i></i></span>
 						</div>
 						<div class="text-center" style="padding-top:15px;">
@@ -116,10 +116,12 @@ require_once('common/header.php');
 			showInterface();
 		}
 	});
-	function showInterface() {
+	function showInterface(time = false) {
 		var id = $("#dapps-list a.active").attr("data-id");
 		current_dapp = id;
-		$("#dapp-iframe").attr("src", "https://dapps.ibuildapp.com/builder/dapp.php?id=" + id);
+		var link = "https://dapps.ibuildapp.com/builder/dapp.php?id=" + id;
+		if (time) link += "&time=" + time;
+		$("#dapp-iframe").attr("src", link);
 	}
 	$("#add-widget").click(function(){
 		if (!current_dapp) return false;
@@ -141,6 +143,24 @@ require_once('common/header.php');
 	});
 	$("#customize-template").click(function(){
 		$("#templateModal" + current_dapp).modal("show");
+	});
+	$(".template-form").submit(function(e){
+		e.preventDefault();
+		var data = $(this).serialize();
+		$.ajax({
+			url: '/builder/change_template.php?id=' + current_dapp,
+			type: 'POST',
+			dataType: 'json',
+			cache: false,
+			data: data,
+			error: function(jqXHR, error){},
+			success: function(data, status){
+				if (!data.error && data.success) {
+					showInterface(data.success);
+				}
+			}
+		});
+		return false;
 	});
 </script>
 <?php require_once('common/footer.php'); ?>
