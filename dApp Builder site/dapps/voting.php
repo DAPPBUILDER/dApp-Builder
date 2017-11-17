@@ -320,6 +320,7 @@ var dapp = (function(){
 					console.log(e);
 				}
 			});
+			
 			var finishEvent = contract.Finish();
 			var finished = false;
             finishEvent.watch(function(e,d){
@@ -360,6 +361,17 @@ window.addEventListener('load', function(){
 	a, a:focus, a:hover, a:active{
 		text-decoration: none;
 		color: <?php echo $interface['links_color']; ?>;
+	}
+	.btn.btn-success.vote-button{
+		background-color: <?php echo $interface['vote_buttons_color']; ?>;
+		border-color: <?php echo $interface['vote_buttons_color']; ?>;
+	}
+	.btn.btn-danger#finish{
+		background-color: <?php echo $interface['finish_button_color']; ?>;
+		border-color: <?php echo $interface['finish_button_color']; ?>;
+	}
+	.btn.btn-success.vote-button:hover, .btn.btn-danger#finish:hover{
+		opacity: 0.8;
 	}
 </style>
 
