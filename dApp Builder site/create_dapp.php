@@ -1,0 +1,35 @@
+<?php
+
+if (empty($_POST['type']) || empty($_POST['name']) || empty($_POST['eth_account'])) exit;
+
+require_once('classes/Helper.php');
+session_start();
+
+$currentUser = Helper::getCurrentUser();
+
+if (!$currentUser) exit;
+
+$type = $_POST['type'];
+$name = $_POST['name'];
+$user = $currentUser->getId();
+$created_at = time();
+$eth_account = $_POST['eth_account'];
+
+$db = db::getInstance();
+
+try {
+	$query = $db->prepare('INSERT INTO `dapps` (`type`,`name`,`user`,`eth_account`, `created_at`) values (:type, :name, :user, :eth_account, :created_at)');
+	$query->bindParam(':type', $type);
+	$query->bindParam(':name', $name);
+	$query->bindParam(':user', $user);
+	$query->bindParam(':eth_account', $eth_account);
+	$query->bindParam(':created_at', $created_at);
+	$query->execute();
+} catch (PDOException $e) {
+	echo json_encode(array('error'=>$e->getMessage()));
+	exit;
+}
+
+$id = $db->lastInsertId();
+
+echo json_encode(array('success' => $id));
