@@ -23,11 +23,11 @@ var dapp = (function(){
     var chainPerson = '<?php echo $eth_account; ?>';
 	var contractAdress = '0x6f79417f9ef721e0c2d6f0843e6084d79386dcbd';
     var contractABI = [{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"}],"name":"getVoted","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"proposalNum","type":"uint256"}],"name":"vote","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"uint256"}],"name":"ballots","outputs":[{"name":"name","type":"bytes32"},{"name":"chainperson","type":"address"},{"name":"blind","type":"bool"},{"name":"finished","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"ballot","type":"bytes32"}],"name":"finishBallot","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"}],"name":"getProposalsNum","outputs":[{"name":"count","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"}],"name":"isVoted","outputs":[{"name":"result","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"proposalName","type":"bytes32"}],"name":"getProposalIndex","outputs":[{"name":"index","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballotName","type":"bytes32"}],"name":"getBallotIndex","outputs":[{"name":"index","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballotIndex","type":"uint256"}],"name":"getWinner","outputs":[{"name":"winnerName","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"proposalName","type":"bytes32"}],"name":"getVotesCount","outputs":[{"name":"count","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"uint256"},{"name":"","type":"uint256"}],"name":"proposals","outputs":[{"name":"name","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"}],"name":"getBallotsNum","outputs":[{"name":"count","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"ballotName","type":"bytes32"},{"name":"blindParam","type":"bool"},{"name":"proposalNames","type":"bytes32[]"}],"name":"startNewBallot","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"voter","type":"address"}],"name":"getVotedData","outputs":[{"name":"proposalNum","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"votedPerson","type":"address"},{"indexed":false,"name":"proposalIndex","type":"uint256"}],"name":"Vote","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"finished","type":"bool"}],"name":"Finish","type":"event"}];
-    window.web3 = new Web3(web3.currentProvider);
-    window.contract = web3.eth.contract(contractABI).at(contractAdress);
 	
     return {
         init: function(name){
+			//window.web3 = new Web3(web3.currentProvider);
+			window.contract = web3.eth.contract(contractABI).at(contractAdress);
             $('#name').html(name);
             this.getBallotIndex(name)
                 .then(index => {
@@ -310,10 +310,10 @@ var dapp = (function(){
 					console.log(d.args);
 					var proposalIndex = d.args.proposalIndex.c[0];
 					$('.proposal-'+proposalIndex).find('.whovoted').append('<p class="voted_address">'+d.args.votedPerson+'</p>');
-					if (d.args.votedPerson == web3.eth.defaultAccount) {
+					$('#collapse-link'+proposalIndex).show();
+					$('.proposal-'+proposalIndex).find('.votes-count').text(parseInt($('.proposal-'+proposalIndex).find('.votes-count').text()) + 1);
+					if (d.args.votedPerson == window.web3.eth.defaultAccount) {
 						$('.vote-button').hide();
-						$('#collapse-link'+proposalIndex).show();
-						$('.proposal-'+proposalIndex).find('.votes-count').text(parseInt($('.proposal-'+proposalIndex).find('.votes-count').text()) + 1);
 						voted = true;
 					}
 				} else if(e) {
@@ -342,8 +342,6 @@ window.addEventListener('load', function(){
 			if (typeof(window.web3.eth.defaultAccount) != 'undefined' && window.web3.eth.defaultAccount) {
 				dapp.init('<?php echo $name; ?>');
 				clearInterval(initTimer);
-			} else {
-				console.log(window.web3.eth.defaultAccount);
 			}
 		}, 1000);
 	}
