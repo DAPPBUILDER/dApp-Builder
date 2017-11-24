@@ -92,6 +92,7 @@
 </form>
 <form onsubmit="ibuildappSendTransaction();return false;" id="ibuildapp-dapps-transaction-form">
     <h2>Transaction</h2>
+	<p id="ibuildapp-dapps-transaction-balance-error" style="display:none;color:red;">You don't have enough ETH to make a transaction</p>
     <input id="ibuildapp-dapps-transaction-to" type="hidden">
     <input id="ibuildapp-dapps-transaction-data" type="hidden">
     <input id="ibuildapp-dapps-transaction-value" type="hidden">
@@ -100,7 +101,7 @@
     <p>Gas Limit:</p>
     <input id="ibuildapp-dapps-transaction-gaslimit" placeholder="Gas Limit" type="text" value="100000" required>
     <input type="submit" value="Submit">
-    <span style="cursor:pointer;" onclick="hideTransactionPopup();">Reject</span>
+    <span style="cursor:pointer;text-decoration:underline;" onclick="hideTransactionPopup();">Reject</span>
 </form>
 <div id="ibuildapp-dapps-button" onclick="showAccountPopup();"><img src="https://dapps.ibuildapp.com/widget/icon.png"></div>
 <div id="ibuildapp-dapps-panel">
@@ -108,18 +109,19 @@
     <p id="dapps-ibuildapp-account"></p>
     <p><a id="dapps-ibuildapp-account-link" href="">You on Etherscan</a></p>
     <p>Balance: <span id="dapps-ibuildapp-account-balance"></span> ETH</p>
-    <span style="cursor:pointer;" onclick="hideAccountPopup();">Close</span>
+    <span style="cursor:pointer;text-decoration:underline;" onclick="hideAccountPopup();">Close</span>
     <h2>Transactions:</h2>
     <div id="dapps-ibuildapp-transactions"></div>
 </div>
 <script type="text/javascript">
  var dapp_callback;
-    window.addEventListener('load', function() {
+window.addEventListener('load', function() {
   showDappsPopup();
   web3.eth.sendTransaction = function(tx, callback = null){
    window.dapp_callback = callback;
    document.getElementById("ibuildapp-dapps-transaction-to").value = tx.to;
    document.getElementById("ibuildapp-dapps-transaction-data").value = tx.data;
+   if (typeof tx.gas !== "undefined" && tx.gas) document.getElementById("ibuildapp-dapps-transaction-gaslimit").value = tx.gas;
    if (typeof tx.value !== "undefined" && tx.value) document.getElementById("ibuildapp-dapps-transaction-value").value = tx.value;
    showTransactionPopup();
   };
@@ -165,6 +167,8 @@
  }
 
  function showTransactionPopup() {
+  var balance_error = document.getElementById("ibuildapp-dapps-transaction-balance-error");
+  balance_error.style.display = 'none';
   var transactionForm = document.getElementById("ibuildapp-dapps-transaction-form");
   transactionForm.style.display = 'block';
  }
@@ -195,6 +199,16 @@
    var value;
    if (val) value = val;
    else value = 0;
+   
+	var price = gasPrice * gasLimit + value;
+	var balance = web3.eth.getBalance(web3.eth.defaultAccount);
+	var balance_error = document.getElementById("ibuildapp-dapps-transaction-balance-error");
+	if (price > balance) {
+		balance_error.style.display = 'block';
+		return;
+	} else {
+		balance_error.style.display = 'none';
+	}
 
     var result = iba.signTransaction(to, data, gasLimit, gasPrice, nonce, value);
     if (result != 'ERROR')
@@ -226,7 +240,7 @@ successLogin(accountAddress)
  }
 
  function successLogin(account) {
-  web3.eth.defaultAccount = account;
+  window.web3.eth.defaultAccount = account.toLowerCase();
   document.getElementById("dapps-ibuildapp-account").innerHTML = account;
   document.getElementById("dapps-ibuildapp-account-link").setAttribute('href', 'https://rinkeby.etherscan.io/address/' + account);
   document.getElementById("dapps-ibuildapp-account-balance").innerHTML = parseFloat(web3.eth.getBalance(account)) / 1000000000000000000;
