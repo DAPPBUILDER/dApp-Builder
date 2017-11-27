@@ -1,4 +1,4 @@
-# dApp-Builder
+# dApp Widget
 
 This is a dApp-browser and Ethereum wallet, stored on a mobile device, and allows you to make transactions when working with Ethereum dApps on your iOS or Android device.
 
