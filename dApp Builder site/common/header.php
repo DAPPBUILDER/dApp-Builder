@@ -50,7 +50,8 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/builder/">dApp <span class="color">Builder</span></a>
+                <!-- <a class="navbar-brand" href="/builder/">dApp <span class="color">Builder</span></a> -->
+                <a class="navbar-brand" href="/builder/"><img src="../images/logo.png" alt="dApp"></a>
             </div>
             <ul class="nav navbar-right top-nav">
                 <li class="dropdown">
