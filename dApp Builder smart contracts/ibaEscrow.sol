@@ -109,8 +109,8 @@ contract ibaEscrow{
     }
     
     function refund(address seller, uint bidId) external returns (bool){
-        Bid memory a = bids[seller][bidId];
-        require(a.buyer == msg.sender && a.isLimited == true && a.timeout < block.number);
+        require(bids[seller][bidId].buyer == msg.sender && bids[seller][bidId].isLimited == true && bids[seller][bidId].timeout < block.number);
+        Bid storage a = bids[seller][bidId];
         a.status = dealStatus.Refund;
         pendingWithdrawals[a.buyer] = a.price-a.fee;
         pendingWithdrawals[a.oracle] = a.fee;
