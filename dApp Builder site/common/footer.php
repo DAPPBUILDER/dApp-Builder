@@ -1,18 +1,33 @@
 <script type="text/javascript">
 	var votingUndeployed = {};
+	var escrowUndeployed = {};
 	<?php if ($undeployed_dapps) { foreach ($undeployed_dapps as $dapp) {  ?>
 		<?php if ($dapp->getDappType() == 'voting') { ?>
 			votingUndeployed['<?php echo $dapp->getId(); ?>'] = {address: '<?php echo $dapp->getEthAccount(); ?>', name: '<?php echo $dapp->getName(); ?>'};
+		<?php } elseif ($dapp->getDappType() == 'escrow') { ?>
+			escrowUndeployed['<?php echo $dapp->getId(); ?>'] = {address: '<?php echo $dapp->getKeyEthAccount(); ?>', name: '<?php echo $dapp->getName(); ?>'};
 		<?php } ?>
 	<?php } } ?>
 </script>
 
 <div class="admin-footer">
-            <div class="text-center " style="font-size: 14px;">
+            <div class="text-center " style="font-size: 16px;">
                 <p class="copyright-txt">
                     <a href="https://dapps.ibuildapp.com/privacy.html" >Privacy Policy</a> | <a href="https://dapps.ibuildapp.com/terms-of-use.html" >Terms of Use</a>
                 </p>                    
             </div>
+
+                <div class="social text-center">
+                        <h4>Join the Community:</h4>
+                        <ul>
+                            <li class=""><a href="https://twitter.com/dappbuilder" target="_blank" title="twitter"><i class="fa fa-twitter"></i></a></li>
+                            <li class="" data-wow-delay="0.2s"><a href="https://www.youtube.com/user/iBuildApp" title="YouTube" target="_blank" ><i class="fa fa-youtube-play"></i></a></li>
+                            <li class="" data-wow-delay="0.4s"><a href="https://t.me/dappbuilder" title="telegram" target="_blank"><i class="fa fa-paper-plane"></i></a></li>
+                            <li class="" data-wow-delay="0.6s"><a href="https://bitcointalk.org/index.php?topic=2317335.msg23534240#msg23534240" title="bitcointalk" target="_blank" ><i class="fa fa-btc"></i></a></li>
+                            <li class="" data-wow-delay="0.8s"><a href="https://business.facebook.com/dappbuilder/" title="facebook" target="_blank" ><i class="fa fa-facebook"></i></a></li>
+                            <li class="" data-wow-delay="0.8s"><a href="https://github.com/iBuildApp/dApp-Builder" title="GitHub" target="_blank" ><i class="fa fa-github"></i></a></li>
+                        </ul>
+                    </div>
         </div>
     </div>
 
@@ -72,14 +87,12 @@
 			</div>
 		</div>
     </div>
-	
-	
-    <!--==========================================================================-->
 
     <script type="text/javascript" src="assets/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="assets/js/jquery.cookie.js"></script>
 	<script type="text/javascript" src="assets/js/main.js"></script>
 	<script type="text/javascript" src="assets/js/constructor/voting.js"></script>
+	<script type="text/javascript" src="assets/js/constructor/escrow.js"></script>
 
 </body>
 </html>
