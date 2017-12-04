@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-contract ibaEscrow{
+contract dapEscrow{
     
     struct Bid{
         bytes32 name;
@@ -109,13 +109,11 @@ contract ibaEscrow{
     }
     
     function refund(address seller, uint bidId) external returns (bool){
-        require(bids[seller][bidId].buyer == msg.sender && bids[seller][bidId].isLimited == true && bids[seller][bidId].timeout < block.number);
+        require(bids[seller][bidId].buyer == msg.sender && bids[seller][bidId].isLimited == true && bids[seller][bidId].timeout < block.number && bids[seller][bidId].status == dealStatus.Pending);
         Bid storage a = bids[seller][bidId];
         a.status = dealStatus.Refund;
-        pendingWithdrawals[a.buyer] = a.price-a.fee;
-        pendingWithdrawals[a.oracle] = a.fee;
+        pendingWithdrawals[a.buyer] = a.price;
         withdraw(a.buyer);
-        withdraw(a.oracle);
         refundDone(seller,bidId);
         return true;
     }
