@@ -1258,14 +1258,16 @@ public class WebPlugin extends AppBuilderModuleMain {
     }
 
     private enum states {
-
         EMPTY, LOAD_START, LOAD_PROGRESS, LOAD_COMPLETE
+    }
+
+
+    public void testVoid () {
+        String str = "Testing" ;
+
     }
 }
 
-/**
- * Using to show HTML page correctly any case
- */
 class ObservableWebView extends WebView {
 
     private OnScrollChangedCallback mOnScrollChangedCallback;
@@ -1289,7 +1291,6 @@ class ObservableWebView extends WebView {
             mOnScrollChangedCallback.onScroll(l, t);
         }
     }
-
     /**
      * Redraws content to show it correctly
      */
