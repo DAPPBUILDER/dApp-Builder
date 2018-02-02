@@ -45,7 +45,7 @@ contract ibaMultisig {
     /*
     * Methods
     */
-    function createWallet(uint approvals, address[] owners) external returns (bool){
+    function createWallet(uint approvals, address[] owners) payable external returns (bool){
 
         /*check if approvals num equals or greater than given owners num*/
         assert(approvals <= owners.length);
@@ -54,6 +54,7 @@ contract ibaMultisig {
         uint currentLen = wallets[msg.sender].length++;
         wallets[msg.sender][currentLen].creator = msg.sender;
         wallets[msg.sender][currentLen].id = currentLen;
+        wallets[msg.sender][currentLen].balance = msg.value;
         wallets[msg.sender][currentLen].owners = owners;
         wallets[msg.sender][currentLen].appovalsreq = approvals;
         wallets[msg.sender][currentLen].initialized = true;
