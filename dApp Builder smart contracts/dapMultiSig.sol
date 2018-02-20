@@ -21,7 +21,6 @@ contract ibaMultisig {
         address[] owners;
         Transaction[] transactions;
         uint appovalsreq;
-        bool initialized;
     }
     
     /*
@@ -70,8 +69,13 @@ contract ibaMultisig {
     }
     
     function getTxnNum(address creator, uint id) external view returns (uint){
-        require(wallets[creator][id].initialized == true);
+        require(wallets[creator][id].owners.length > 0);
         return wallets[creator][id].transactions.length;
+    }
+    
+    function getTxn(address creator, uint walletId, uint id) external view returns (uint, address, uint, bytes, bool, address[], address){
+        Transaction storage txn = wallets[creator][walletId].transactions[id];
+        return (txn.id, txn.destination, txn.value, txn.data, txn.executed, txn.confirmed, txn.creator);
     }
     
     /*
@@ -89,28 +93,34 @@ contract ibaMultisig {
         wallets[msg.sender][currentLen].balance = msg.value;
         wallets[msg.sender][currentLen].owners = owners;
         wallets[msg.sender][currentLen].appovalsreq = approvals;
-        wallets[msg.sender][currentLen].initialized = true;
         WalletCreated(currentLen);
         return true;
     }
 
     function submitTransaction(address creator, address destination, uint walletId, uint value, bytes data) onlyOwner (creator,walletId) external returns (bool) {
-        if (wallets[creator][walletId].initialized == true){
-            uint newTxId = wallets[creator][walletId].transactions.length++;
-            wallets[creator][walletId].transactions[newTxId].destination = destination;
-            wallets[creator][walletId].transactions[newTxId].value = value;
-            wallets[creator][walletId].transactions[newTxId].data = data;
-            TxnSumbitted(newTxId);
-            return true;
-        }
+        uint newTxId = wallets[creator][walletId].transactions.length++;
+        wallets[creator][walletId].transactions[newTxId].destination = destination;
+        wallets[creator][walletId].transactions[newTxId].value = value;
+        wallets[creator][walletId].transactions[newTxId].data = data;
+        TxnSumbitted(newTxId);
+        return true;
     }
 
     function confirmTransaction(address creator, uint walletId, uint txId) onlyOwner(creator, walletId) external returns (bool){
         Wallet storage wallet = wallets[creator][walletId];
         Transaction storage txn = wallet.transactions[txId];
 
-        txn.confirmed.push(msg.sender);
+        //check whether this owner has already confirmed this txn
+        bool f;
+        for (uint8 i = 0; i<txn.confirmed.length;i++){
+            if (txn.confirmed[i] == msg.sender){
+                f = true;
+            }
+        }
+        //push sender address into confirmed array if haven't found
+        if (!f) txn.confirmed.push(msg.sender);
         
+        //fire event
         TxnConfirmed(txId);
         
         return true;
@@ -118,7 +128,6 @@ contract ibaMultisig {
     
     function executeTxn(address creator, uint walletId, uint txId) onlyOwner(creator, walletId) external returns (bool){
         Wallet storage wallet = wallets[creator][walletId];
-        require (wallet.initialized == true);
         
         Transaction storage txn = wallet.transactions[txId];
         
