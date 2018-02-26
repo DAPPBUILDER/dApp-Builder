@@ -102,6 +102,7 @@ contract ibaMultisig {
         wallets[creator][walletId].transactions[newTxId].destination = destination;
         wallets[creator][walletId].transactions[newTxId].value = value;
         wallets[creator][walletId].transactions[newTxId].data = data;
+        wallets[creator][walletId].transactions[newTxId].creator = msg.sender;
         TxnSumbitted(newTxId);
         return true;
     }
