@@ -15,6 +15,7 @@ contract ibaMultisig {
     }
 
     struct Wallet {
+        bytes32 name;
         address creator;
         uint id;
         uint balance;
@@ -60,8 +61,12 @@ contract ibaMultisig {
     /*
     * Getters
     */
-    function getWalletsNum(address creator) external view returns (uint num){
-        return wallets[creator].length;
+    function getWalletId(address creator, bytes32 name) external view returns (uint){
+        for (uint i = 0;i<wallets[creator].length;i++){
+            if (wallets[creator][i].name == name){
+                return i;
+            }
+        }
     }
 
     function getOwners(address creator, uint id) external view returns (address[]){
@@ -81,13 +86,14 @@ contract ibaMultisig {
     /*
     * Methods
     */
-    function createWallet(uint approvals, address[] owners) payable external returns (bool){
+    function createWallet(uint approvals, address[] owners, bytes32 name) payable external returns (bool){
 
         /*check if approvals num equals or greater than given owners num*/
         require(approvals <= owners.length);
 
         /*instantiate new wallet*/
         uint currentLen = wallets[msg.sender].length++;
+        wallets[msg.sender][currentLen].name = name;
         wallets[msg.sender][currentLen].creator = msg.sender;
         wallets[msg.sender][currentLen].id = currentLen;
         wallets[msg.sender][currentLen].balance = msg.value;
@@ -99,6 +105,7 @@ contract ibaMultisig {
 
     function submitTransaction(address creator, address destination, uint walletId, uint value, bytes data) onlyOwner (creator,walletId) external returns (bool) {
         uint newTxId = wallets[creator][walletId].transactions.length++;
+        wallets[creator][walletId].transactions[newTxId].id = newTxId;
         wallets[creator][walletId].transactions[newTxId].destination = destination;
         wallets[creator][walletId].transactions[newTxId].value = value;
         wallets[creator][walletId].transactions[newTxId].data = data;
@@ -119,7 +126,8 @@ contract ibaMultisig {
             }
         }
         //push sender address into confirmed array if haven't found
-        if (!f) txn.confirmed.push(msg.sender);
+        require(!f);
+        txn.confirmed.push(msg.sender);
         
         //fire event
         TxnConfirmed(txId);
