@@ -18,7 +18,7 @@ contract ibaMultisig {
         bytes32 name;
         address creator;
         uint id;
-        uint balance;
+        uint allowance;
         address[] owners;
         Transaction[] transactions;
         uint appovalsreq;
@@ -86,21 +86,23 @@ contract ibaMultisig {
     /*
     * Methods
     */
-    function createWallet(uint approvals, address[] owners, bytes32 name) payable external returns (bool){
+    function createWallet(uint approvals, address[] owners, bytes32 name) external payable{
 
         /*check if approvals num equals or greater than given owners num*/
         require(approvals <= owners.length);
+        
+        /* check if name exists */
+        require(name.length != 0);
 
         /*instantiate new wallet*/
         uint currentLen = wallets[msg.sender].length++;
         wallets[msg.sender][currentLen].name = name;
         wallets[msg.sender][currentLen].creator = msg.sender;
         wallets[msg.sender][currentLen].id = currentLen;
-        wallets[msg.sender][currentLen].balance = msg.value;
+        wallets[msg.sender][currentLen].allowance = msg.value;
         wallets[msg.sender][currentLen].owners = owners;
         wallets[msg.sender][currentLen].appovalsreq = approvals;
         WalletCreated(currentLen);
-        return true;
     }
 
     function submitTransaction(address creator, address destination, uint walletId, uint value, bytes data) onlyOwner (creator,walletId) external returns (bool) {
@@ -144,7 +146,7 @@ contract ibaMultisig {
         require(txn.confirmed.length >= wallet.appovalsreq);
         
         /* check whether wallet has sufficient balance to send this transaction */
-        require(wallet.balance >= txn.value);
+        require(wallet.allowance >= txn.value);
         
         /* send transaction */
         address dest = txn.destination;
@@ -156,7 +158,7 @@ contract ibaMultisig {
         txn.executed == true;
 
         /* change wallet's balance */
-        wallet.balance = wallet.balance - txn.value;
+        wallet.allowance = wallet.allowance - txn.value;
 
         return true;
         
