@@ -47,6 +47,7 @@ contract ibaMultisig {
     event WalletCreated(uint id);
     event TxnSumbitted(uint id);
     event TxnConfirmed(uint id);
+    event topUpBalance(uint value);
 
     /*
     * Storage
@@ -88,6 +89,7 @@ contract ibaMultisig {
     /*
     * Methods
     */
+    
     function createWallet(uint approvals, address[] owners, bytes32 name) external payable{
 
         /* check if name was actually given */
@@ -116,6 +118,12 @@ contract ibaMultisig {
         WalletCreated(currentLen);
     }
 
+    function topBalance(address creator, uint id) external payable {
+        require (msg.value > 0 wei);
+        wallets[creator][id].allowance += msg.value;
+        topUpBalance(msg.value);
+    }
+    
     function submitTransaction(address creator, address destination, uint walletId, uint value, bytes data) onlyOwner (creator,walletId) external returns (bool) {
         uint newTxId = wallets[creator][walletId].transactions.length++;
         wallets[creator][walletId].transactions[newTxId].id = newTxId;
