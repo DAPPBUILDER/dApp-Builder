@@ -9,7 +9,7 @@ contract ibaMultisig {
         address destination;
         uint value;
         bytes data;
-        bool executed;
+        TxnStatus status;
         address[] confirmed;
         address creator;
     }
@@ -23,6 +23,8 @@ contract ibaMultisig {
         Transaction[] transactions;
         uint appovalsreq;
     }
+    
+    enum TxnStatus { Unconfirmed, Pending, Executed }
     
     /*
     * Modifiers
@@ -78,9 +80,9 @@ contract ibaMultisig {
         return wallets[creator][id].transactions.length;
     }
     
-    function getTxn(address creator, uint walletId, uint id) external view returns (uint, address, uint, bytes, bool, address[], address){
+    function getTxn(address creator, uint walletId, uint id) external view returns (uint, address, uint, bytes, TxnStatus, address[], address){
         Transaction storage txn = wallets[creator][walletId].transactions[id];
-        return (txn.id, txn.destination, txn.value, txn.data, txn.executed, txn.confirmed, txn.creator);
+        return (txn.id, txn.destination, txn.value, txn.data, txn.status, txn.confirmed, txn.creator);
     }
     
     /*
@@ -140,6 +142,10 @@ contract ibaMultisig {
         require(!f);
         txn.confirmed.push(msg.sender);
         
+        if (txn.confirmed.length == wallet.appovalsreq){
+            txn.status = TxnStatus.Pending;
+        }
+        
         //fire event
         TxnConfirmed(txId);
         
@@ -151,8 +157,8 @@ contract ibaMultisig {
         
         Transaction storage txn = wallet.transactions[txId];
         
-        /* check whether transaction has reached required amount of confirmations */
-        require(txn.confirmed.length >= wallet.appovalsreq);
+        /* check txn status */
+        require(txn.status == TxnStatus.Pending);
         
         /* check whether wallet has sufficient balance to send this transaction */
         require(wallet.allowance >= txn.value);
@@ -164,7 +170,7 @@ contract ibaMultisig {
         assert(dest.call.value(val)(dat));
             
         /* change transaction's status to executed */
-        txn.executed == true;
+        txn.status == TxnStatus.Executed;
 
         /* change wallet's balance */
         wallet.allowance = wallet.allowance - txn.value;
