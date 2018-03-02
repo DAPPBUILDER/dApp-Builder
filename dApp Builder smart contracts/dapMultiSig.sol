@@ -61,10 +61,10 @@ contract ibaMultisig {
     /*
     * Getters
     */
-    function getWalletId(address creator, bytes32 name) external view returns (uint){
+    function getWalletId(address creator, bytes32 name) external view returns (uint, bool){
         for (uint i = 0;i<wallets[creator].length;i++){
             if (wallets[creator][i].name == name){
-                return i;
+                return (i, true);
             }
         }
     }
@@ -88,12 +88,21 @@ contract ibaMultisig {
     */
     function createWallet(uint approvals, address[] owners, bytes32 name) external payable{
 
+        /* check if name was actually given */
+        require(name.length != 0);
+        
         /*check if approvals num equals or greater than given owners num*/
         require(approvals <= owners.length);
         
-        /* check if name exists */
-        require(name.length != 0);
-
+        /* check if wallets with given name already exists */
+        bool found;
+        for (uint i = 0; i<wallets[msg.sender].length;i++){
+            if (wallets[msg.sender][i].name == name){
+                found = true;
+            }
+        }
+        require (found == false);
+        
         /*instantiate new wallet*/
         uint currentLen = wallets[msg.sender].length++;
         wallets[msg.sender][currentLen].name = name;
