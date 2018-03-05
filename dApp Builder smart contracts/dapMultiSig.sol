@@ -96,6 +96,10 @@ contract ibaMultisig {
         return wallets[creator][id].logs.length;
     }
     
+    function getLog(address creator, uint id, uint logId) external view returns (address, uint){
+        return(wallets[creator][id].logs[logId].sender, wallets[creator][id].logs[logId].amount);
+    }
+    
     /*
     * Methods
     */
