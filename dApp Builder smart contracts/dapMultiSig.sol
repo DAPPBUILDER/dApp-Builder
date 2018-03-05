@@ -20,8 +20,14 @@ contract ibaMultisig {
         uint id;
         uint allowance;
         address[] owners;
+        Log[] logs;
         Transaction[] transactions;
         uint appovalsreq;
+    }
+    
+    struct Log {
+        uint amount;
+        address sender;
     }
     
     enum TxnStatus { Unconfirmed, Pending, Executed }
@@ -53,7 +59,7 @@ contract ibaMultisig {
     * Storage
     */
     mapping (address => Wallet[]) public wallets;
-
+    
     /*
     * Constructor
     */
@@ -84,6 +90,10 @@ contract ibaMultisig {
     function getTxn(address creator, uint walletId, uint id) external view returns (uint, address, uint, bytes, TxnStatus, address[], address){
         Transaction storage txn = wallets[creator][walletId].transactions[id];
         return (txn.id, txn.destination, txn.value, txn.data, txn.status, txn.confirmed, txn.creator);
+    }
+    
+    function getLogsNum(address creator, uint id) external view returns (uint){
+        return wallets[creator][id].logs.length;
     }
     
     /*
@@ -121,6 +131,11 @@ contract ibaMultisig {
     function topBalance(address creator, uint id) external payable {
         require (msg.value > 0 wei);
         wallets[creator][id].allowance += msg.value;
+        
+        /* create new log entry */
+        uint loglen = wallets[creator][id].logs.length++;
+        wallets[creator][id].logs[loglen].amount = msg.value;
+        wallets[creator][id].logs[loglen].sender = msg.sender;
         topUpBalance(msg.value);
     }
     
