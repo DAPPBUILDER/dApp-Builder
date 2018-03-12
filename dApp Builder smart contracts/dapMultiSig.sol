@@ -197,7 +197,7 @@ contract ibaMultisig {
         assert(dest.call.value(val)(dat));
             
         /* change transaction's status to executed */
-        txn.status == TxnStatus.Executed;
+        txn.status = TxnStatus.Executed;
 
         /* change wallet's balance */
         wallet.allowance = wallet.allowance - txn.value;
