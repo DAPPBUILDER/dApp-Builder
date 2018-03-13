@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.21;
 contract ibaMultisig {
 
     /*
@@ -129,7 +129,7 @@ contract ibaMultisig {
         wallets[msg.sender][currentLen].allowance = msg.value;
         wallets[msg.sender][currentLen].owners = owners;
         wallets[msg.sender][currentLen].appovalsreq = approvals;
-        WalletCreated(currentLen);
+        emit WalletCreated(currentLen);
     }
 
     function topBalance(address creator, uint id) external payable {
@@ -140,7 +140,7 @@ contract ibaMultisig {
         uint loglen = wallets[creator][id].logs.length++;
         wallets[creator][id].logs[loglen].amount = msg.value;
         wallets[creator][id].logs[loglen].sender = msg.sender;
-        topUpBalance(msg.value);
+        emit topUpBalance(msg.value);
     }
     
     function submitTransaction(address creator, address destination, uint walletId, uint value, bytes data) onlyOwner (creator,walletId) external returns (bool) {
@@ -150,7 +150,7 @@ contract ibaMultisig {
         wallets[creator][walletId].transactions[newTxId].value = value;
         wallets[creator][walletId].transactions[newTxId].data = data;
         wallets[creator][walletId].transactions[newTxId].creator = msg.sender;
-        TxnSumbitted(newTxId);
+        emit TxnSumbitted(newTxId);
         return true;
     }
 
@@ -174,7 +174,7 @@ contract ibaMultisig {
         }
         
         //fire event
-        TxnConfirmed(txId);
+        emit TxnConfirmed(txId);
         
         return true;
     }
