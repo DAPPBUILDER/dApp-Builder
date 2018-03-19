@@ -12,9 +12,9 @@ var voteDapp = (function(){
                 $('#voting-candidates').append(
 					'<div style="display:none;" class="input-group creation-form">' +
 						'<span class="input-group-addon">Candidate:</span>' +
-						'<input type="text" class="form-control" required>' +
+						'<input placeholder="Candidate.." type="text" class="form-control required-voting required-dapp" required>' +
 						'<span class="input-group-btn">' +
-							'<button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-trash"></i></button>' +
+							'<button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>' +
 						'</span>' +
 					'</div>'
                 );
@@ -134,5 +134,5 @@ var voteDapp = (function(){
 })();
 
 window.addEventListener('load', function(){
-   voteDapp.init();
+	voteDapp.init();
 });

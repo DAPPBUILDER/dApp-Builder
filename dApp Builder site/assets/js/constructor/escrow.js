@@ -102,6 +102,10 @@ var escrowDapp = (function(){
 			$('#create-escrow-dapp').click(function(){
 				escrowDapp.create();
 			});
+			/*var createdEvent = escrowContract.bidCreated();
+			createdEvent.watch(function(e,d){
+				console.log(d.args);
+			})*/
 			if (!$.isEmptyObject(window.escrowUndeployed)) {
 				setInterval(function(){
 					for (var key in window.escrowUndeployed) {
