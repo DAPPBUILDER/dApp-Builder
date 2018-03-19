@@ -20,10 +20,14 @@ if (!$dapp) exit;
 $type = $dapp->getDappType();
 $name = $dapp->getName();
 $eth_account = $dapp->getEthAccount();
+$key_eth_account = $dapp->getKeyEthAccount();
 $interface = $dapp->getInterface();
 
 switch ($type) {
 	case 'voting':
 		require_once 'dapps/voting.php';
+		break;
+	case 'escrow':
+		require_once 'dapps/escrow.php';
 		break;
 }
