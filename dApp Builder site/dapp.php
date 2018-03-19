@@ -24,10 +24,13 @@ $key_eth_account = $dapp->getKeyEthAccount();
 $interface = $dapp->getInterface();
 
 switch ($type) {
-	case 'voting':
-		require_once 'dapps/voting.php';
-		break;
-	case 'escrow':
-		require_once 'dapps/escrow.php';
-		break;
+    case 'voting':
+        require_once 'dapps/voting.php';
+        break;
+    case 'escrow':
+        require_once 'dapps/escrow.php';
+        break;
+    case 'multisig':
+        require_once 'dapps/multisig.php';
+        break;
 }
