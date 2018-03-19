@@ -52,7 +52,7 @@
 /* BUTTON */
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
     .btn-default {    
-    	font-size: 18px; line-height: 20px; color: #00c382; text-transform: uppercase; 
+    	font-size: 18px; line-height: 20px; color: #00c382; 
     	border-radius: 8px; padding: 14px 36px; background: inherit;
 	    border: solid 2px #00c382; transition: all 0.6s;}
     .btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, 
@@ -210,6 +210,7 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 	#hackathon-app {margin: 0;padding: 0;border: 0;outline: 0;}
 	.container-fluid#hackathon-container {padding-left: 0; padding-right: 0; background: #222230;overflow:hidden;}
+        .container-fluid#bonus-container {padding-left: 0; padding-right: 0; background: #222230;overflow:hidden;}
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 	.share42 {padding: 20px 10px; width: 100%; border-top: solid 1px rgba(255, 255, 255, 0.64);}
@@ -217,19 +218,94 @@
 	.share42 span {opacity: 0.6; -webkit-transition: all .6s ease; transition: all .6s ease;}
 	.share42:hover span {opacity: 1;}
 
+
+    .desktoplink {    
+            padding: 20px 20px 60px; border-top: solid 1px #e3e7ef; margin-top: 30px;
+        background: #f1f3f7; }
+    .desktoplink input {text-align: center; border: none; background: #ffffff;}    
+    .desktoplink .form-control[disabled], .desktoplink  .form-control[readonly], .desktoplink  fieldset[disabled] .form-control {
+        background: #ffffff;}
+    .desktoplink .form-control:focus  { border-color: inherit; box-shadow: none;}  
+    .desktoplink h4 {color: #124765; font-size: 22px;}
+    .desktoplink .btn-primary {    
+        padding: 6px 20px; margin: 0; line-height: inherit; font-size: 16px;}
+
 /* new-dapp.php */
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 	.container-fluid#hackathon-container.page-content {background-color: #f3f6f9; min-height: 700px;}
+        .container-fluid#bonus-container.page-content {background-color: #f3f6f9; min-height: 700px;}
 	.creation-form {padding-bottom: 15px;}
 	.dapp-type-block {display: none;}
 
 	#creation-form .input-group-addon {background-color: #eaf0f7; border-color: #eaf0f7; color: #2c6484;}
 	#creation-form .form-control:focus {
 	    border-color: #1fe284;box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 4px rgba(31, 226, 132, 0.28);}
+        
+        #bonus-container  h1 {font-size: 48px; color: #fff;}
+	#bonus-container h1 .decor-h {color: #1fe284; font-family: 'Ubuntu-M',sans-serif;	}
 
+        .form-bonus .bonus {width: auto; height: auto; padding-top: 20px; padding-bottom: 30px; border-bottom: solid 1px #cbd6d3;}
+        
+        .form-bonus {
+		margin-top: -140px; margin-bottom: 50px; padding: 40px 10px 40px; background: #fff; border-radius: 5px;
+	    box-shadow: 0 15px 40px 2px rgba(44, 48, 102, 0.21); }
+        .cont-page .overlay {padding: 20px 0 160px;}
+	.cont-page .title {margin: 20px 0 20px;}	
+	.cont-page h2 {color: #fff; margin-bottom: 20px; font-size: 56px;}	
+
+	.form-bonus .bonus .input-group-addon {font-size: 16px;}
+        
+        .form-bonus h4 {color: #124561; font-size: 22px;}
+        .form-bonus h4, h3 {display: inline;}
+        
+        .form-bonus .bonus-history p:hover {color: #00c382; font-size: 15px;}
+        .form-bonus .bonus-history {padding-top: 20px;}
+
+	.form-bonus .bonus .form-control {   
+	    background-color: #fff; font-size: 16px; background-image: none; height: 40px;
+	    border: 1px solid #eaf0f7;}
+        
+        .form-bonus .nav-tabs {margin-bottom: 20px; border-bottom: 2px solid #eaf0f7;}   
+        .form-bonus .nav-tabs img {max-width: 70px; margin-bottom: 10px;}
+
+        .form-bonus .nav-tabs>li.active>a, .form-bonus .nav-tabs>li.active>a:focus, 
+        .form-bonus .nav-tabs>li.active>a:hover {
+            color: #6effb6;
+            cursor: default;
+            background-color: #0d85a7;
+            background: linear-gradient(to top, #0aadd8 0%, #2ea3ce 100%);
+            border: 1px solid #ddd;
+            border-bottom-color: transparent;
+            padding: 10px 30px;
+        }
+        .form-bonus .nav-tabs>li>a {
+            margin-right: 4px;
+            line-height: 1.42857143;
+            border: 1px solid transparent;
+            border-radius: 8px 8px 0 0;
+            background-color: #175069;
+            background: linear-gradient(to top, #00324e 0%, #206992 100%);
+            text-align: center; text-decoration: underline;
+            padding: 10px 30px;
+            color: #6effb6;
+            font-size: 18px;
+        }
+        .form-bonus .nav>li>a:focus, .form-bonus .nav>li>a:hover {
+            text-decoration: none;
+            background-color: #206992;
+            background: #206992;
+        }
+
+        .form-bonus .select-value {display: none !important;}
+
+	.btn-danger {color: #ea475c; background-color: #eaf0f7; border-color: #eaf0f7; font-size: 18px;}
+	.btn-danger:hover, .btn-danger:active, .btn-danger:focus, .btn-danger:active:hover {
+	    color: #d8102a; background-color: #eaf0f7; border-color: #eaf0f7; font-size: 18px;}
+        
 	#hackathon-container  h1 {font-size: 48px; color: #fff;}
 	#hackathon-container h1 .decor-h {color: #1fe284; font-family: 'Ubuntu-M',sans-serif;	}
-	.form-hackathon {
+
+        .form-hackathon {
 		margin-top: -140px; margin-bottom: 50px; padding: 40px 10px 40px; background: #fff; border-radius: 5px;
 	    box-shadow: 0 15px 40px 2px rgba(44, 48, 102, 0.21); }
 	.cont-page .overlay {padding: 20px 0 160px;}
@@ -243,17 +319,85 @@
 	    background-color: #fff; font-size: 16px; background-image: none; height: 40px;
 	    border: 1px solid #eaf0f7;}
 
+    .form-hackathon .nav-tabs {margin-bottom: 20px; border-bottom: 2px solid #eaf0f7; max-height: 127px;}   
+    .form-hackathon .nav-tabs img {max-width: 70px; margin-bottom: 10px;}
+
+    .form-hackathon .nav-tabs>li.active>a, .form-hackathon .nav-tabs>li.active>a:focus, 
+    .form-hackathon .nav-tabs>li.active>a:hover {
+        color: #6effb6;
+        cursor: default;
+        background-color: #0d85a7;
+        background: linear-gradient(to top, #0aadd8 0%, #2ea3ce 100%);
+        border: 1px solid #ddd;
+        border-bottom-color: transparent;
+        padding: 10px 30px;
+    }
+    .form-hackathon .nav-tabs>li>a {
+        margin-right: 4px;
+        line-height: 1.42857143;
+        border: 1px solid transparent;
+        border-radius: 8px 8px 0 0;
+        background-color: #175069;
+        background: linear-gradient(to top, #00324e 0%, #206992 100%);
+        text-align: center; text-decoration: underline;
+        padding: 10px 30px;
+        color: #6effb6;
+        font-size: 18px;
+    }
+    .form-hackathon .nav>li>a:focus, .form-hackathon .nav>li>a:hover {
+        text-decoration: none;
+        background-color: #206992;
+        background: #206992;
+    }
+
+    .form-hackathon .select-value {display: none !important;}
+
 	.btn-danger {color: #ea475c; background-color: #eaf0f7; border-color: #eaf0f7; font-size: 18px;}
 	.btn-danger:hover, .btn-danger:active, .btn-danger:focus, .btn-danger:active:hover {
 	    color: #d8102a; background-color: #eaf0f7; border-color: #eaf0f7; font-size: 18px;}
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/* new-dapp tabs */
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
+    #creation-form .nav-tabs .dapp-tab {margin-bottom: 10px; height: 127px; width: 130px;}   
+    #creation-form .nav-tabs .dapp-tab img {max-width: 50px; margin-bottom: 20px;}
+
+    #creation-form .nav-tabs .dapp-tab>li.active>a, #creation-form .nav-tabs .dapp-tab>li.active>a:focus, 
+    #creation-form .nav-tabs .dapp-tab>li.active>a:hover {
+        max-height: 127;
+        color: #6effb6;
+        cursor: default;
+        background-color: #0d85a7;
+        background: linear-gradient(to top, #0aadd8 0%, #2ea3ce 100%);
+        border: 1px solid #ddd;
+        border-bottom-color: transparent;
+        padding: 10px 30px;
+    }
+    #creation-form .nav-tabs .dapp-tab>li>a>p {padding-bottom: 20px;}
+    #creation-form .nav-tabs .dapp-tab>li>a {
+        margin-bottom: 20px;
+        margin-right: 4px;
+        line-height: 1.42857143;
+        border: 1px solid transparent;
+        border-radius: 8px 8px 0 0;
+        background-color: #175069;
+        background: linear-gradient(to top, #00324e 0%, #206992 100%);
+        text-align: center; text-decoration: underline;
+        padding: 10px 30px;
+        color: #6effb6;
+        font-size: 18px;
+    }
+    #creation-form .nav>li>a:focus, #creation-form .nav>li>a:hover {
+        text-decoration: none;
+        background-color: #206992;
+        background: #206992;
+    }
 
 /* my-dapps.php */
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 	.dapp-descr {
 		margin-top: -140px; margin-bottom: 50px;
-    	padding: 0px 0px 40px; background: #fff; border-radius: 5px;
+    	/*padding: 0px 0px 40px;*/ background: #fff; border-radius: 5px;
     	box-shadow: 0 15px 40px 2px rgba(44, 48, 102, 0.21);}
     .dapp-descr .list-group-item:last-child {border-bottom-right-radius: 0; border-bottom-left-radius: 0;}	
     .dapp-descr .list-group-item.active, .dapp-descr .list-group-item.active:focus, 
@@ -277,6 +421,17 @@
     .form-control:focus {
     	border-color: #1fe284;
     	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 4px rgba(31, 226, 132, 0.28);}
+    
+    .form-bonus .bonus .input-group .form-control {border: 1px solid #eaf0f7;}
+    .form-bonus .bonus .input-group .form-control:focus {
+    	border-color: #1fe284;
+    	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 4px rgba(31, 226, 132, 0.28);}
+    
+    .form-bonus .bonus .btn-me {
+        color: #fff; border: none; font-size: 18px;
+        background-image: linear-gradient(to top, #06b57b 0%, #2ef5b2 100%); padding: 7px 20px;
+    }   
+    .form-bonus .bonus .btn-me:hover {background: #06a074;}
 
     .form-hackathon .btn-me {
         color: #fff; border: none; font-size: 18px;
@@ -307,7 +462,8 @@
     @media (max-width: 767px) { }
     @media (max-width: 667px) { 
     	.block-iframe { margin: 20px 40px;} } 
-    @media (max-width: 568px) {    
+    @media (max-width: 568px) {
+        .form-bonus {border-radius: 0;}
         .form-hackathon {border-radius: 0;}    
         .dapp-descr {margin: -140px 0px 50px; border-radius: 0; }
     }

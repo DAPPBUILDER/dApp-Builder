@@ -16,9 +16,11 @@ $username = $currentUser->getUsername();
 $application = $currentUser->getApplication();
 $api_id = $currentUser->getApiId();
 $api_key = $currentUser->getApiKey();
+$google_id = $currentUser->getGoogleIdentity();
 $deployed_dapps = $currentUser->getDeployedDapps();
 $undeployed_dapps = $currentUser->getUndeployedDapps();
 $added_dapps = $currentUser->getAddedDapps();
+$bonus_tokens = $currentUser->getBonusTokens();
 
 require_once('common/header.php');
 ?>
@@ -61,21 +63,28 @@ require_once('common/header.php');
 									<select class="form-control" aria-describedby="dapp-type-label" id="dapp-type-select" required>
 										<option value="voting">Voting</option>
 										<option value="escrow">Escrow</option>
+                                                                                <option value="multisig">Multisignature Wallet</option>
 									</select>
 								</div>
 
 
-								<ul class="nav nav-tabs">     
+								<ul class="nav nav-tabs text-center">     
 									<li class="active dapp-tab" data-value="voting">
 								   		<a class="" data-toggle="tab" href="#">
 								   		<img src="assets/images/Voting.png" alt="Voting" /><br>
-								   		Voting</a>
+								   		<p class="text-center" >Voting</p></a>
 									</li>
 									<li class="dapp-tab" data-value="escrow">
 								   		<a data-toggle="tab" href="#">
 								   		<img src="assets/images/Escrow.png" alt="Escrow" /><br>
-								   		Escrow</a>
+								   		<p class="text-center" >Escrow</p></a>
 									</li>
+                                                                        <li class="dapp-tab text-center" data-value="multisig"> 
+								   		<a style="font-size: 14px; padding-left: 18px; height: 127px;" data-toggle="tab" href="#">
+								   		<img style="margin-left: 10px; margin-bottom: 22px;" src="assets/images/Multisig.png" alt="Multisignature Wallet" /><br>
+                                                                                <p class="text-center" style="font-size: 14px; margin-bottom: 0; padding-bottom: 0;line-height: 0.6;">Multisignature</p>
+                                                                                <p class="text-center" style="font-size: 14px; margin-top: 0; padding-top: 0; line-height: 2;padding-left: 10px;">Wallet</p></a>
+                                                                        </li>
 								</ul>
 
 
@@ -150,6 +159,41 @@ require_once('common/header.php');
 										<button type="button" id="escrow-set-limit" data-setted="0" class="btn btn-primary">Set time limit</button>
 										<button type="submit" class="btn btn-primary">Create Escrow dApp</button>
 										<button type="button" style="display:none;" id="create-escrow-dapp"></button>
+									</div>
+								</div>
+                                                            
+                                                                <div id="multisig-dapp" class="dapp-type-block">
+                                                                        <div class="input-group creation-form">
+										<span class="input-group-addon">Initial balance (ETH):</span>
+										<input id="multisig-balance" min="0" step="0.001" value="0" type="number" class="form-control required-multisig required-dapp">
+									</div>
+                                                                    
+                                                                        <div class="input-group creation-form">
+										<span class="input-group-addon">Approvals number to confirm a transaction:</span>
+										<input id="multisig-approvals" min="1" step="1" value="2" type="number" class="form-control required-multisig required-dapp">
+									</div>
+                                                                    
+									<h4 class="text-center">Owners:</h4>
+									<div id="multisig-owners">
+                                                                            <div class="input-group creation-form">
+                                                                                <span class="input-group-addon">Owner:</span>
+                                                                                <input id="multisig-first-owner" placeholder="0x0000000000000000000000000000000000000000" type="text" class="form-control required-multisig required-dapp">
+                                                                                <span class="input-group-btn">
+                                                                                    <button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>
+                                                                                </span>
+                                                                            </div>
+									    <div class="input-group creation-form">
+                                                                                <span class="input-group-addon">Owner:</span>
+                                                                                <input placeholder="0x0000000000000000000000000000000000000000" type="text" class="form-control required-multisig required-dapp">
+                                                                                <span class="input-group-btn">
+                                                                                    <button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>
+                                                                                </span>
+                                                                            </div>
+									</div>
+									<div class="text-center creation-form">
+										<button type="button" id="multisig-add-owner" class="btn btn-primary">Add an Owner</button>
+										<button type="submit" class="btn btn-primary">Create Multisignature Wallet</button>
+										<button type="button" style="display:none;" id="create-multisig-dapp"></button>
 									</div>
 								</div>
 								
@@ -227,6 +271,35 @@ require_once('common/header.php');
 					$('#escrow-timelimit').val(dapp_template.timelimit);
 					$("#escrow-set-limit").click();
 				}
+                        } else if (dapp_template.type == 'multisig') {
+                                if (typeof dapp_template.balance != 'undefined') {
+					$('#multisig-balance').val(dapp_template.balance);
+				}
+                                if (typeof dapp_template.approvals != 'undefined') {
+					$('#multisig-approvals').val(dapp_template.approvals);
+				}
+                                for (var i = 0, len = dapp_template.owners.length; i < len; i++) {
+					if (i < 2) {
+						var flag = true;
+						$('#multisig-owners').find('input').each(function(){
+							if ($(this).val() == '' && flag) {
+								$(this).val(dapp_template.owners[i]);
+								flag = false;
+							}
+						});
+					} else {
+						$('#multisig-owners').append(
+                                                        '<div style="display:none;" class="input-group creation-form">' +
+                                                            '<span class="input-group-addon">Owner:</span>' +
+                                                            '<input required placeholder="0x0000000000000000000000000000000000000000" value="' + dapp_template.owners[i] + '" type="text" class="form-control required-multisig required-dapp">' +
+                                                            '<span class="input-group-btn">' +
+                                                                '<button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>' +
+                                                            '</span>' +
+                                                        '</div>'
+						);
+					}
+				}
+				$('#multisig-owners>div').fadeIn();
 			}
 		} else {
 			checkDappType();
@@ -255,7 +328,10 @@ require_once('common/header.php');
 		} else if (type == 'escrow') {
 			$("#escrow-dapp").fadeIn();
 			$(".required-escrow").attr("required", "");
-		}
+		} else if (type == 'multisig') {
+                        $("#multisig-dapp").fadeIn();
+			$(".required-multisig").attr("required", "");
+                }
 	}
 	function showError(error, is_static = false) {
 		$("#error-text").html(error);
@@ -290,7 +366,11 @@ require_once('common/header.php');
 						setInterval(function(){
 							escrowDapp.checkDeployed($("#escrow-seller").val(), name, data.success, true)
 						}, 3000);
-					}
+					} else if (type == 'multisig') {
+                                                setInterval(function(){
+							multisigDapp.checkDeployed(web3.eth.defaultAccount, name, data.success, true)
+						}, 3000);
+                                        }
 				} else {
 					showError(data.error);
 				}
@@ -364,7 +444,14 @@ require_once('common/header.php');
 				dapp_template.oracle = $('#escrow-oracle').val();
 				dapp_template.fee = $('#escrow-fee').val();
 				dapp_template.timelimit = $('#escrow-timelimit').val();
-			}
+			} else if (type == 'multisig') {
+                                dapp_template.balance = $('#multisig-balance').val();
+				dapp_template.approvals = $('#multisig-approvals').val();
+                                dapp_template.owners = [];
+                                $('#multisig-owners input').each(function(){
+					dapp_template.owners.push($(this).val());
+				});
+                        }
 			localStorage.setItem('dapp_template', JSON.stringify(dapp_template));
 			return false;
 		}
@@ -386,15 +473,15 @@ require_once('common/header.php');
 			var oracle_addr = $("#escrow-oracle").val();
 			var price = parseInt($("#escrow-price").val());
 			var fee = parseInt($("#escrow-fee").val());
-			if (!seller_addr.match(/^0x[0-9a-zA-Z]+$/)) {
+			if (!seller_addr.match(/^0x[0-9a-fA-F]+$/)) {
 				showError('Incorrect seller\'s address');
 				return false;
 			}
-			if (!buyer_addr.match(/^0x[0-9a-zA-Z]+$/)) {
+			if (!buyer_addr.match(/^0x[0-9a-fA-F]+$/)) {
 				showError('Incorrect buyer\'s address');
 				return false;
 			}
-			if (!oracle_addr.match(/^0x[0-9a-zA-Z]+$/)) {
+			if (!oracle_addr.match(/^0x[0-9a-fA-F]+$/)) {
 				showError('Incorrect agent\'s address');
 				return false;
 			}
@@ -402,11 +489,47 @@ require_once('common/header.php');
 				showError('The price should be greater than agent\'s fee');
 				return false;
 			}
-			
 			escrowDapp.checkName(seller_addr, name, function(){
 				$('#create-escrow-dapp').click();
 			});
-		}
+		} else if (type == 'multisig') {
+                        var approvals = parseInt($("#multisig-approvals").val());
+                        var owners = 0;
+                        var owners_arr = [];
+                        var incorrect_address = false;
+                        $('#multisig-owners input').each(function(){
+                            var owner = $(this).val();
+                            if (!owner.match(/^0x[0-9a-fA-F]+$/)) incorrect_address = true;
+                            owners_arr.push(owner.toLowerCase());
+                            owners++;
+			});
+                        if (incorrect_address) {
+                            showError('One or more owners\'s addresses are incorrect');
+                            return false;
+                        }
+                        for (var i = 0; i < owners_arr.length; i++) {
+                            for (var j = 0; j < owners_arr.length; j++) {
+                                if (owners_arr[i] == owners_arr[j] && i != j) {
+                                    showError('All owner\'s addresses must be different');
+                                    return false;
+                                }
+                            }
+                        }
+                        if (approvals < 1) {
+                            showError('Multisignature wallet needs at least one approval');
+                            return false;
+                        }
+                        if (approvals > owners) {
+                            showError('The number of owners must be greater or equal to the number of approvals');
+                            for (i = owners; i < approvals; i++) {
+                                $('#multisig-add-owner').click();
+                            }
+                            return false;
+                        }
+                        multisigDapp.checkName(web3.eth.defaultAccount, name, function(){
+                            $('#create-multisig-dapp').click();
+			});
+                }
 		return false;
 	});
 </script>
@@ -429,7 +552,7 @@ require_once('common/header.php');
 		<div class="modal-content">
 			<div class="modal-header text-center">    
 				<h2>Pending Transaction</h2>
-				<p>Please wait while deployment of your dApp in blockchain is completed. DON'T CLOSE this page, you will be taken to your dApps in a few minutes</p>
+				<p>Please wait while deployment of your dApp to blockchain is completed. DON'T CLOSE this page, you will be taken to your dApps in a few minutes</p>
 			</div>
 			<div class="modal-body"></div>
 		</div>
