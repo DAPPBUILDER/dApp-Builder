@@ -11,11 +11,15 @@
 <div class="container text-center">
 	<h1 id="name"></h1>
 	<p id="blind"></p>
-	<p>The list of candidates:</p>
-	<div class="proposals row"></div>
-	<p style="padding-top:15px;">
-		<button type="button" style="display:none;" class="btn btn-danger" id="finish">Finish the voting</button>
-	</p>
+
+    <div class="list_candid">
+    	<h4>The list of candidates:</h4>
+    	<div class="proposals row"></div>
+    	<p style="padding-top:15px;">
+    		<button type="button" style="display:none;" class="btn btn-danger" id="finish">Finish the voting</button>
+    	</p>
+    </div>
+
 </div>
 <script type="text/javascript" src="assets/js/bootstrap.min.js"></script>
 <script type="text/javascript">
@@ -209,7 +213,7 @@ var dapp = (function(){
                     $('.proposals').append(el);
                     if (data.ballot[2] == false){
                         $('#blind').html('This voting is not secret, you can see other votes.');
-                        var count = $('<p>Votes count: <span class="votes-count">'+data.proposals[i].voteCount+'</span></p><p><a style="display:none;" id="collapse-link'+data.proposals[i].index+'" data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample'+data.proposals[i].index+'" href="#whovoted'+data.proposals[i].index+'">Show votes</a></p>');
+                        var count = $('<p class="count">Votes count: <span class="votes-count">'+data.proposals[i].voteCount+'</span></p><p><a style="display:none;" id="collapse-link'+data.proposals[i].index+'" data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample'+data.proposals[i].index+'" href="#whovoted'+data.proposals[i].index+'">Show votes</a></p>');
                         el.append(count);
 						var votedWrapper = $('<div class="whovoted collapse" id="whovoted'+data.proposals[i].index+'"></div>');
 						for (var x=0;x<data.voted.length;x++){
@@ -230,7 +234,7 @@ var dapp = (function(){
                         $('#blind').html('This voting is secret, you can not see other votes.');
                     }
                     if (data.ballot[3] == false && data.isVoted == false){
-                        var link = $('<p><button type="button" class="btn btn-success vote-button">Vote</button></p>');
+                        var link = $('<p class="candid-one"><button type="button" class="btn btn-success vote-button">Vote</button></p>');
                         el.append(link);
                         link.on('click',function(){
                             $(window).trigger('vote',{ballot: data.index,proposal: data.proposals[i].index});
@@ -351,26 +355,31 @@ window.addEventListener('load', function(){
 <style>
 	body{
 		color: <?php echo $interface['text_color']; ?>;
-		background-color: <?php echo $interface['background_color']; ?>;
-	}
-	.voted_address{
-		color: <?php echo $interface['eth_addresses_color']; ?>;
-	}
+		background-color: <?php echo $interface['background_color']; ?>;	}
+	.voted_address{color: <?php echo $interface['eth_addresses_color']; ?>;	}
 	a, a:focus, a:hover, a:active{
 		text-decoration: none;
-		color: <?php echo $interface['links_color']; ?>;
-	}
+		color: <?php echo $interface['links_color']; ?>;	}
 	.btn.btn-success.vote-button{
 		background-color: <?php echo $interface['vote_buttons_color']; ?>;
-		border-color: <?php echo $interface['vote_buttons_color']; ?>;
-	}
+		border-color: <?php echo $interface['vote_buttons_color']; ?>;	}
 	.btn.btn-danger#finish{
 		background-color: <?php echo $interface['finish_button_color']; ?>;
-		border-color: <?php echo $interface['finish_button_color']; ?>;
-	}
-	.btn.btn-success.vote-button:hover, .btn.btn-danger#finish:hover{
-		opacity: 0.8;
-	}
+		border-color: <?php echo $interface['finish_button_color']; ?>;	}
+	.btn.btn-success.vote-button:hover, .btn.btn-danger#finish:hover{ opacity: 0.8;	}
+
+     #name {color: <?php echo $interface['headers_color']; ?>;}
+     #blind {font-style: italic;}
+     .list_candid {margin-top: 20px;}
+     .list_candid h3 {margin-top: 10px; margin-bottom: 0px; }
+     .list_candid h4 {color: <?php echo $interface['headers_color']; ?>;}
+     .btn {padding: 8px 38px; text-transform: uppercase;}
+     .btn.btn-success.vote-button {text-transform: uppercase;}
+
+     .candid-one { border-bottom: solid 1px <?php echo $interface['vote_buttons_color']; ?>; padding-bottom: 20px;}
+     .votes-count {opacity: 0.8;}
+     .count {color: <?php echo $interface['eth_addresses_color']; ?>;}
+
 </style>
 
 </body>

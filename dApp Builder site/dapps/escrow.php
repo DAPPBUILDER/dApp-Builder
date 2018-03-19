@@ -140,6 +140,30 @@ var dapp = (function(){
 				$('#cancel').hide();
 			}
 			
+			/*var filter = web3.eth.filter({fromBlock:'latest'});
+			filter.watch(function(error, result){
+				var blockNumber = result.blockNumber;
+				if (bid[8] == true && bid[5].c[0] < blockNumber && status != 4){
+					if (bid[3] == web3.eth.defaultAccount && status == 1) {
+						$('#refund').show();
+						$('#refund').unbind('click');
+						$('#refund').on('click', function(){
+							$(window).trigger('refund', {bid: bid});
+						});
+					}
+					$('#close').hide();
+					$('#paybutton').hide();
+					$('#cancel').hide();
+					$('#status').html('The time limit has expired');
+				} else {
+					$('#refund').hide();
+				}
+				if (bid[8] == true) {
+					$('#cur-block').html('The current block is <span class="eth_address">#' + blockNumber + '</span>');
+					$('#cur-block').show();
+				}
+			});*/
+			
 			timerClock = setInterval(function(){
 				web3.eth.getBlockNumber(function(e,result){
 					var blockNumber = result;
