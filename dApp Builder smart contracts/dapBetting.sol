@@ -10,7 +10,7 @@ contract dapBetting {
         uint id;
         bytes32 name;
         address[] whoBet;
-        uint amoutReceived;
+        uint amountReceived;
     }
     
     struct betEvent{
@@ -83,7 +83,7 @@ contract dapBetting {
         require(found);
         require(betEvents[creator][eventId].status == eventStatus.open);
         foundBid.whoBet.push(msg.sender);
-        foundBid.amoutReceived += msg.value;
+        foundBid.amountReceived += msg.value;
         uint newBetId = betEvents[creator][eventId].bets.length++;
         betEvents[creator][eventId].bets[newBetId].person = msg.sender;
         betEvents[creator][eventId].bets[newBetId].amount = msg.value;
@@ -115,7 +115,7 @@ contract dapBetting {
         uint wonBetsLen;
         for (uint y=0;y<cEvent.bids.length;y++){
             if (cEvent.bids[y].name != cEvent.winner){
-                amountLost += cEvent.bids[y].amoutReceived;
+                amountLost += cEvent.bids[y].amountReceived;
             }
         }
         uint feeAmount = (amountLost/100)*cEvent.arbitratorFee;
@@ -155,8 +155,17 @@ contract dapBetting {
         return betEvents[creator][eventId].bids.length;
     }
     
+    function getBid(address creator, uint eventId, uint bidId) external view returns (uint, bytes32, uint){
+    	bid storage foundBid = betEvents[creator][eventId].bids[bidId];
+    	return(foundBid.id, foundBid.name, foundBid.amountReceived);
+    }
+
     function getBetsNums(address creator, uint eventId) external view returns (uint){
         return betEvents[creator][eventId].bets.length;
+    }
+
+    function getWhoBet(address creator, uint eventId, uint bidId) external view returns (address[]){
+    	return betEvents[creator][eventId].bids[bidId].whoBet;
     }
     
     function getBet(address creator, uint eventId, uint betId) external view returns(address, bytes32, uint){
