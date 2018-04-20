@@ -4,7 +4,7 @@ contract dapBetting {
     
     /* Types */
     
-    enum eventStatus{ open, closed, finished }
+    enum eventStatus{ open, finished, closed }
     
     struct bid{
         uint id;
@@ -41,7 +41,6 @@ contract dapBetting {
     event EventCreated(uint id, address creator);
     event betMade(uint value, uint id);
     event eventStatusChanged(uint status);
-    event eventFinished(bytes32 winner);
     event withdrawalDone(uint amount);
     
     /* Methods */
@@ -49,6 +48,14 @@ contract dapBetting {
     function createEvent(bytes32 name, bytes32[] names, address arbitrator, uint fee) external{
         
         require(fee < 100);
+        /* check whether event with such name already exist */
+        bool found;
+        for (uint8 x = 0;x<betEvents[msg.sender].length;x++){
+            if(betEvents[msg.sender][x].name == name){
+                found = true;
+            }
+        }
+        require(!found);
         
         /* check names for duplicates */
         for (uint8 y=0;i<names.length;i++){
@@ -56,6 +63,7 @@ contract dapBetting {
         }
         
         uint newId = betEvents[msg.sender].length++;
+        betEvents[msg.sender][newId].id = newId;
         betEvents[msg.sender][newId].name = name;
         betEvents[msg.sender][newId].arbitrator = arbitrator;
         betEvents[msg.sender][newId].status = eventStatus.open;
@@ -65,13 +73,14 @@ contract dapBetting {
         for (uint8 i = 0;i < names.length; i++){
             uint newBidId = betEvents[msg.sender][newId].bids.length++;
             betEvents[msg.sender][newId].bids[newBidId].name = names[i];
+            betEvents[msg.sender][newId].bids[newBidId].id = newBidId;
         }
         
         emit EventCreated(newId, msg.sender);
     }
     
     function makeBet(address creator, uint eventId, bytes32 bidName) payable external{
-        
+        require(betEvents[creator][eventId].status == eventStatus.open);
         /* check whether bid with given name actually exists */
         bool found;
         for (uint8 i=0;i<betEvents[creator][eventId].bids.length;i++){
@@ -81,7 +90,6 @@ contract dapBetting {
             }
         }
         require(found);
-        require(betEvents[creator][eventId].status == eventStatus.open);
         foundBid.whoBet.push(msg.sender);
         foundBid.amountReceived += msg.value;
         uint newBetId = betEvents[creator][eventId].bets.length++;
@@ -93,12 +101,14 @@ contract dapBetting {
     }
     
     function finishEvent(address creator, uint eventId) external{
+    	require(betEvents[creator][eventId].status == eventStatus.open);
         require(msg.sender == betEvents[creator][eventId].arbitrator);
         betEvents[creator][eventId].status = eventStatus.finished;
         emit eventStatusChanged(1);
     }
     
     function determineWinner(address creator, uint eventId, bytes32 bidName) external{
+    	require(betEvents[creator][eventId].status == eventStatus.finished);
         require(msg.sender == betEvents[creator][eventId].arbitrator);
         bool found;
         for (uint8 i=0;i<betEvents[creator][eventId].bids.length;i++){
@@ -107,9 +117,7 @@ contract dapBetting {
             }
         }
         //require(found);
-        require(betEvents[creator][eventId].status == eventStatus.finished);
         betEvent storage cEvent = betEvents[creator][eventId];
-        //cEvent.status = eventStatus.finished;
         cEvent.winner = bidName;
         uint amountLost;
         uint wonBetsLen;
@@ -134,7 +142,8 @@ contract dapBetting {
                pendingWithdrawals[cEvent.bets[c].person] += adamount;
             }
         }
-        emit eventFinished(cEvent.winner);
+        cEvent.status = eventStatus.closed;
+        emit eventStatusChanged(2);
     }
     
     function withdraw(address person) private{
