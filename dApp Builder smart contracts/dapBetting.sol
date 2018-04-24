@@ -124,15 +124,16 @@ contract dapBetting {
         cEvent.winner = bidName;
         uint amountLost;
         uint amountWon;
+        uint lostBetsLen;
+        /*Calculating amount of all lost bets */
         for (uint x=0;x<betEvents[creator][eventId].bids.length;x++){
             if (cEvent.bids[x].name != cEvent.winner){
+                lostBetsLen++;
                 amountLost += cEvent.bids[x].amountReceived;
             }
         }
-        uint feeAmount = (amountLost/100)*cEvent.arbitratorFee;
-        amountLost = amountLost - feeAmount;
-        pendingWithdrawals[cEvent.arbitrator] += feeAmount;
         
+        /* Calculating amount of all won bets */
         for (x=0;x<cEvent.bets.length;x++){
             if(cEvent.bets[x].bidName == cEvent.winner){
                 uint wonBetAmount = cEvent.bets[x].amount;
@@ -140,10 +141,21 @@ contract dapBetting {
                 pendingWithdrawals[cEvent.bets[x].person] += wonBetAmount;
             }
         }
-        for (x=0;x<cEvent.bets.length;x++){
+        /* If we do have win bets */
+        if (amountWon > 0){
+            amountLost = amountLost - ((amountLost/100)*cEvent.arbitratorFee);
+            for (x=0;x<cEvent.bets.length;x++){
             if(cEvent.bets[x].bidName == cEvent.winner){
                 uint wonBetPercentage = cEvent.bets[x].amount/amountWon;
                 pendingWithdrawals[cEvent.bets[x].person] += amountLost*wonBetPercentage;
+            }
+            pendingWithdrawals[cEvent.arbitrator] = (amountLost/100)*cEvent.arbitratorFee;
+        }
+        } else {
+            /* If we dont have any bets won, we pay all the funds back except arbitrator fee */
+            for(x=0;x<cEvent.bets.length;x++){
+                pendingWithdrawals[cEvent.bets[x].person] = cEvent.bets[x].amount-((cEvent.bets[x].amount/100) * cEvent.arbitratorFee);
+                pendingWithdrawals[cEvent.arbitrator] = (cEvent.bets[x].amount/100) * cEvent.arbitratorFee;
             }
         }
         cEvent.status = eventStatus.closed;
@@ -169,6 +181,7 @@ contract dapBetting {
             }
         }
     }
+    
     /* Getters */
     
     function getBidsNum(address creator, uint eventId) external view returns (uint){
