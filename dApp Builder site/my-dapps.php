@@ -16,9 +16,11 @@ $username = $currentUser->getUsername();
 $application = $currentUser->getApplication();
 $api_id = $currentUser->getApiId();
 $api_key = $currentUser->getApiKey();
+$google_id = $currentUser->getGoogleIdentity();
 $deployed_dapps = $currentUser->getDeployedDapps();
 $undeployed_dapps = $currentUser->getUndeployedDapps();
 $added_dapps = $currentUser->getAddedDapps();
+$bonus_tokens = $currentUser->getBonusTokens();
 
 if (!$deployed_dapps) {
 	header('Location: /builder/new-dapp.php');
@@ -28,28 +30,86 @@ if (!$deployed_dapps) {
 require_once('common/header.php');
 ?>
 <div id="page-wrapper">
+
 	<div id="hackathon-container" class="container-fluid page-content">
-		<h1 class="text-center">My dApps</h1>
-		<div class="row">
-			<div class="col-md-4 col-md-offset-1">
-				<div class="list-group" id="dapps-list">
-					<?php $first = true; foreach ($deployed_dapps as $dapp) { ?>
-						<a data-id="<?php echo $dapp->getId(); ?>" class="list-group-item <?php echo ($first) ? 'active' : 'inactive'; ?>">
-							<?php echo $dapp->getName(); ?>
-						</a>
-					<?php $first = false; } ?>
+
+		<section class="cont-page"> 
+			<div class="fullscreen parallax" style="background-image:url('../images/bg1.jpg');" data-img-width="1920" data-img-height="900 " data-diff="100">
+				<div class="overlay">
+					<div class="container">
+					<div class="row">
+					<div class="col-lg-8 col-lg-offset-2 col-sm-10 col-xs-12">
+						<div class="title text-center">
+							<h1 class=" ">My <span class="decor-h">dApps</span></h1>
+						</div>
+					</div>
+					</div>	
+					</div>
 				</div>
-				<p><button id="add-widget" type="button" class="btn btn-success">Add selected dApp as widget into mobile App</button></p>
-				<p><a id="customize-template" style="cursor:pointer;">Customize the dApp's template</a></p>
 			</div>
-			<div class="col-md-4 col-md-offset-2">
-				<iframe id="dapp-iframe" style="width:100%;height:500px;"></iframe>
+		</section>
+		<!--________________________________________________-->
+
+		<div class="conteiner">
+			<div class="row">
+
+				<!--_______________________________________________________-->
+				<div class="col-md-5 col-md-offset-1">
+					<div class="dapp-descr">
+						<div class="list-dapp-my list-group text-center" id="dapps-list">
+							<?php $first = true; foreach ($deployed_dapps as $dapp) { ?>
+								<a data-id="<?php echo $dapp->getId(); ?>" class="list-group-item <?php echo ($first) ? 'active' : 'inactive'; ?>">
+									<?php echo $dapp->getName(); ?>
+								</a>
+							<?php $first = false; } ?>
+						</div>
+						<div class="text-center"><button id="add-widget" type="button" class="btn btn-primary">Add selected dApp as widget into mobile App</button></div>
+						<div class="text-center"><a class="btn btn-default" id="customize-template" style="cursor:pointer;">Customize the dApp's template</a></div>
+						
+						<div class="desktoplink text-center">
+							<h4>Desktop link for the selected dApp:</h4>
+							<div class="input-group">
+								<input id="dapp-link" readonly type="text" class="form-control" aria-describedby="dapp-link-label" >
+								<span class="input-group-btn">
+									<button id="dapp-link-copy" class="btn btn-primary" type="button">copy</button>
+								</span>
+							</div>
+
+							<h4>Share in social networks:</h4>
+							<div class="share42init"
+							data-url=""
+							data-icons-file="icons.png"
+							data-path="/builder/assets/share42/"
+							data-image="https://dapps.ibuildapp.com/builder/assets/images/dappimg.png"
+							>
+							</div>
+
+						<script type="text/javascript" src="assets/share42/share42-new.js"></script>
+						</div>
+
+						
+
+					</div>
+				</div>
+
+
+				<!--_______________________________________________________-->
+
+				<div class="col-md-4 col-md-offset-1">
+					<div class="block-iframe">
+						<iframe id="dapp-iframe" style="width:100%;height:500px;"></iframe>
+					</div>	
+				</div>
+				<!--_______________________________________________________-->
+
 			</div>
-		</div>
+
+		</div>	
 	</div>
 </div>
 
-<?php foreach ($deployed_dapps as $dapp) { $interface = $dapp->getInterface(); if ($dapp->getDappType() == 'voting') { ?>
+<?php foreach ($deployed_dapps as $dapp) { $interface = $dapp->getInterface(); ?>
+<?php if ($dapp->getDappType() == 'voting') { ?>
 	<div id="templateModal<?php echo $dapp->getId(); ?>" class="modal fade" role="dialog" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -59,38 +119,212 @@ require_once('common/header.php');
 				</div>
 				<div class="modal-body">
 					<form method="post" class="template-form">
-						<p class="text-center">Background color:</p>
-						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="background_color" type="text" class="form-control input-lg" value="<?php echo $interface['background_color']; ?>" required>
-							<span class="input-group-addon"><i></i></span>
+						<div class="one-settings">
+							<p class="text-center">Background color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="background_color" type="text" class="form-control input-lg" value="<?php echo $interface['background_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
 						</div>
-						<p class="text-center">Text color:</p>
-						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="text_color" type="text" class="form-control input-lg" value="<?php echo $interface['text_color']; ?>" required>
-							<span class="input-group-addon"><i></i></span>
+
+						<div class="one-settings">
+							<p class="text-center">Text color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="text_color" type="text" class="form-control input-lg" value="<?php echo $interface['text_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
 						</div>
-						<p class="text-center">Links color:</p>
-						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="links_color" type="text" class="form-control input-lg" value="<?php echo $interface['links_color']; ?>" required>
-							<span class="input-group-addon"><i></i></span>
+						
+						<div class="one-settings">
+							<p class="text-center">Headers color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="headers_color" type="text" class="form-control input-lg" value="<?php echo $interface['headers_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
 						</div>
-						<p class="text-center">Ethereum addresses color:</p>
-						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="eth_addresses_color" type="text" class="form-control input-lg" value="<?php echo $interface['eth_addresses_color']; ?>" required>
-							<span class="input-group-addon"><i></i></span>
+
+						<div class="one-settings">
+							<p class="text-center">Links color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="links_color" type="text" class="form-control input-lg" value="<?php echo $interface['links_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
 						</div>
-						<p class="text-center">Vote buttons color:</p>
-						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="vote_buttons_color" type="text" class="form-control input-lg" value="<?php echo $interface['vote_buttons_color']; ?>" required>
-							<span class="input-group-addon"><i></i></span>
+
+						<div class="one-settings">
+							<p class="text-center">Ethereum addresses color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="eth_addresses_color" type="text" class="form-control input-lg" value="<?php echo $interface['eth_addresses_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
 						</div>
-						<p class="text-center">Finish button color:</p>
-						<div class="input-group colorpicker-component colorpicker-input">
-							<input name="finish_button_color" type="text" class="form-control input-lg" value="<?php echo $interface['finish_button_color']; ?>" required>
-							<span class="input-group-addon"><i></i></span>
+
+						<div class="one-settings">
+							<p class="text-center">Vote buttons color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="vote_buttons_color" type="text" class="form-control input-lg" value="<?php echo $interface['vote_buttons_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
 						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Finish button color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="finish_button_color" type="text" class="form-control input-lg" value="<?php echo $interface['finish_button_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
 						<div class="text-center" style="padding-top:15px;">
-							<button type="submit" class="btn btn-success">Save</button>
+							<button type="submit" class="btn btn-primary">Save</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+<?php } elseif ($dapp->getDappType() == 'escrow') { ?>
+	<div id="templateModal<?php echo $dapp->getId(); ?>" class="modal fade" role="dialog" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header text-center">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h2>Template Settings</h2>
+				</div>
+				<div class="modal-body">
+					<form method="post" class="template-form">
+						<div class="one-settings">
+							<p class="text-center">Background color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="background_color" type="text" class="form-control input-lg" value="<?php echo $interface['background_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Text color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="text_color" type="text" class="form-control input-lg" value="<?php echo $interface['text_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+						
+						<div class="one-settings">
+							<p class="text-center">Headers color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="headers_color" type="text" class="form-control input-lg" value="<?php echo $interface['headers_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div style="display:none;" class="one-settings">
+							<p class="text-center">Links color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="links_color" type="text" class="form-control input-lg" value="<?php echo $interface['links_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Ethereum addresses color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="eth_addresses_color" type="text" class="form-control input-lg" value="<?php echo $interface['eth_addresses_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Pay/Close buttons color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="ok_buttons_color" type="text" class="form-control input-lg" value="<?php echo $interface['ok_buttons_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Cancel/Refund buttons color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="cancel_buttons_color" type="text" class="form-control input-lg" value="<?php echo $interface['cancel_buttons_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="text-center" style="padding-top:15px;">
+							<button type="submit" class="btn btn-primary">Save</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+<?php } elseif ($dapp->getDappType() == 'multisig') { ?>
+	<div id="templateModal<?php echo $dapp->getId(); ?>" class="modal fade" role="dialog" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header text-center">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h2>Template Settings</h2>
+				</div>
+				<div class="modal-body">
+					<form method="post" class="template-form">
+						<div class="one-settings">
+							<p class="text-center">Background color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="background_color" type="text" class="form-control input-lg" value="<?php echo $interface['background_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Text color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="text_color" type="text" class="form-control input-lg" value="<?php echo $interface['text_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+						
+						<div class="one-settings">
+							<p class="text-center">Headers color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="headers_color" type="text" class="form-control input-lg" value="<?php echo $interface['headers_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div style="display:none;" class="one-settings">
+							<p class="text-center">Links color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="links_color" type="text" class="form-control input-lg" value="<?php echo $interface['links_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Ethereum addresses color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="eth_addresses_color" type="text" class="form-control input-lg" value="<?php echo $interface['eth_addresses_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Approve/Send buttons color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="ok_buttons_color" type="text" class="form-control input-lg" value="<?php echo $interface['ok_buttons_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Navigation buttons color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="cancel_buttons_color" type="text" class="form-control input-lg" value="<?php echo $interface['cancel_buttons_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="text-center" style="padding-top:15px;">
+							<button type="submit" class="btn btn-primary">Save</button>
 						</div>
 					</form>
 				</div>
@@ -121,7 +355,13 @@ require_once('common/header.php');
 		current_dapp = id;
 		var link = "https://dapps.ibuildapp.com/builder/dapp.php?id=" + id;
 		if (time) link += "&time=" + time;
-		$("#dapp-iframe").attr("src", link);
+		else {
+			$("#dapp-link").val(link);
+			$(".share42init").attr('data-url',link);
+			$(".share42init").attr('data-title','My dApp: ' + $("#dapps-list a.active").text());
+			shareInit();
+		}
+		$("#dapp-iframe").attr("src", '/builder/dapp.php?id=' + id);
 	}
 	$("#add-widget").click(function(){
 		if (!current_dapp) return false;
@@ -162,5 +402,21 @@ require_once('common/header.php');
 		});
 		return false;
 	});
+	$("#dapp-link-copy").click(function(){
+		$('#dapp-link-copy').hide();
+		window.getSelection().removeAllRanges(); 
+		var link = document.querySelector('#dapp-link');
+		var range = document.createRange();
+		range.selectNode(link);
+		window.getSelection().addRange(range);
+		try {
+			document.execCommand('copy');
+		} catch(err) {
+			console.log('Oops, unable to copy');  
+		}
+		window.getSelection().removeAllRanges();
+                $('#dapp-link-copy').show(); 
+	});
 </script>
+
 <?php require_once('common/footer.php'); ?>
