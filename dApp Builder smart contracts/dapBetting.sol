@@ -112,7 +112,7 @@ contract dapBetting {
     }
     
     function finishEvent(address creator, uint eventId) external{
-    	require(betEvents[creator][eventId].status == eventStatus.open);
+        require(betEvents[creator][eventId].status == eventStatus.open);
         require(msg.sender == betEvents[creator][eventId].arbitrator);
         betEvents[creator][eventId].status = eventStatus.finished;
         emit eventStatusChanged(1);
@@ -128,7 +128,6 @@ contract dapBetting {
         /*Calculating amount of all lost bets */
         for (uint x=0;x<betEvents[creator][eventId].bids.length;x++){
             if (cEvent.bids[x].name != cEvent.winner){
-                lostBetsLen++;
                 amountLost += cEvent.bids[x].amountReceived;
             }
         }
@@ -139,23 +138,26 @@ contract dapBetting {
                 uint wonBetAmount = cEvent.bets[x].amount;
                 amountWon += wonBetAmount;
                 pendingWithdrawals[cEvent.bets[x].person] += wonBetAmount;
+            } else {
+                lostBetsLen++;
             }
         }
         /* If we do have win bets */
         if (amountWon > 0){
-            amountLost = amountLost - ((amountLost/100)*cEvent.arbitratorFee);
+            pendingWithdrawals[cEvent.arbitrator] += amountLost/100*cEvent.arbitratorFee;
+            amountLost = amountLost - (amountLost/100*cEvent.arbitratorFee);
             for (x=0;x<cEvent.bets.length;x++){
             if(cEvent.bets[x].bidName == cEvent.winner){
-                uint wonBetPercentage = cEvent.bets[x].amount/amountWon;
-                pendingWithdrawals[cEvent.bets[x].person] += amountLost*wonBetPercentage;
+                //uint wonBetPercentage = cEvent.bets[x].amount*100/amountWon;
+                uint wonBetPercentage = percent(cEvent.bets[x].amount, amountWon, 2);
+                pendingWithdrawals[cEvent.bets[x].person] += (amountLost/100)*wonBetPercentage;
             }
-            pendingWithdrawals[cEvent.arbitrator] = (amountLost/100)*cEvent.arbitratorFee;
         }
         } else {
             /* If we dont have any bets won, we pay all the funds back except arbitrator fee */
             for(x=0;x<cEvent.bets.length;x++){
-                pendingWithdrawals[cEvent.bets[x].person] = cEvent.bets[x].amount-((cEvent.bets[x].amount/100) * cEvent.arbitratorFee);
-                pendingWithdrawals[cEvent.arbitrator] = (cEvent.bets[x].amount/100) * cEvent.arbitratorFee;
+                pendingWithdrawals[cEvent.bets[x].person] += cEvent.bets[x].amount-((cEvent.bets[x].amount/100) * cEvent.arbitratorFee);
+                pendingWithdrawals[cEvent.arbitrator] += (cEvent.bets[x].amount/100) * cEvent.arbitratorFee;
             }
         }
         cEvent.status = eventStatus.closed;
@@ -170,7 +172,7 @@ contract dapBetting {
     }
     
     function requestWithdraw() external {
-        require(pendingWithdrawals[msg.sender] != 0);
+        //require(pendingWithdrawals[msg.sender] != 0);
         withdraw(msg.sender);
     }
     
@@ -182,6 +184,18 @@ contract dapBetting {
         }
     }
     
+    function calc(uint one, uint two) private pure returns(uint){
+        return one/two;
+    }
+    function percent(uint numerator, uint denominator, uint precision) public 
+
+    pure returns(uint quotient) {
+           // caution, check safe-to-multiply here
+          uint _numerator  = numerator * 10 ** (precision+1);
+          // with rounding of last digit
+          uint _quotient =  ((_numerator / denominator) + 5) / 10;
+          return ( _quotient);
+    }
     /* Getters */
     
     function getBidsNum(address creator, uint eventId) external view returns (uint){
@@ -189,8 +203,8 @@ contract dapBetting {
     }
     
     function getBid(address creator, uint eventId, uint bidId) external view returns (uint, bytes32, uint){
-    	bid storage foundBid = betEvents[creator][eventId].bids[bidId];
-    	return(foundBid.id, foundBid.name, foundBid.amountReceived);
+        bid storage foundBid = betEvents[creator][eventId].bids[bidId];
+        return(foundBid.id, foundBid.name, foundBid.amountReceived);
     }
 
     function getBetsNums(address creator, uint eventId) external view returns (uint){
@@ -198,7 +212,7 @@ contract dapBetting {
     }
 
     function getWhoBet(address creator, uint eventId, uint bidId) external view returns (address[]){
-    	return betEvents[creator][eventId].bids[bidId].whoBet;
+        return betEvents[creator][eventId].bids[bidId].whoBet;
     }
     
     function getBet(address creator, uint eventId, uint betId) external view returns(address, bytes32, uint){
