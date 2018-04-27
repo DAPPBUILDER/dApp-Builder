@@ -21,12 +21,21 @@
     </div>
 
 </div>
+
+<?php require_once __DIR__ . '/../common/dapp-placeholder.php'; ?>
+
 <script type="text/javascript" src="assets/js/bootstrap.min.js"></script>
 <script type="text/javascript">
 var dapp = (function(){
     var chainPerson = '<?php echo $eth_account; ?>';
-	var contractAdress = '0x6f79417f9ef721e0c2d6f0843e6084d79386dcbd';
-    var contractABI = [{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"}],"name":"getVoted","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"proposalNum","type":"uint256"}],"name":"vote","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"uint256"}],"name":"ballots","outputs":[{"name":"name","type":"bytes32"},{"name":"chainperson","type":"address"},{"name":"blind","type":"bool"},{"name":"finished","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"ballot","type":"bytes32"}],"name":"finishBallot","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"}],"name":"getProposalsNum","outputs":[{"name":"count","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"}],"name":"isVoted","outputs":[{"name":"result","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"proposalName","type":"bytes32"}],"name":"getProposalIndex","outputs":[{"name":"index","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballotName","type":"bytes32"}],"name":"getBallotIndex","outputs":[{"name":"index","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballotIndex","type":"uint256"}],"name":"getWinner","outputs":[{"name":"winnerName","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"proposalName","type":"bytes32"}],"name":"getVotesCount","outputs":[{"name":"count","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"uint256"},{"name":"","type":"uint256"}],"name":"proposals","outputs":[{"name":"name","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"}],"name":"getBallotsNum","outputs":[{"name":"count","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"ballotName","type":"bytes32"},{"name":"blindParam","type":"bool"},{"name":"proposalNames","type":"bytes32[]"}],"name":"startNewBallot","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"voter","type":"address"}],"name":"getVotedData","outputs":[{"name":"proposalNum","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"votedPerson","type":"address"},{"indexed":false,"name":"proposalIndex","type":"uint256"}],"name":"Vote","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"finished","type":"bool"}],"name":"Finish","type":"event"}];
+    
+    <?php if ($network == 'main') { ?>
+        var contractAdress = '<?php echo VOTING_MAIN_ADDRESS; ?>';
+    <?php } elseif ($network == 'rinkeby') { ?>
+        var contractAdress = '<?php echo VOTING_RINKEBY_ADDRESS; ?>';
+    <?php } ?>
+    
+    var contractABI = <?php echo VOTING_ABI; ?>;
 	
     return {
         init: function(name){
@@ -257,6 +266,7 @@ var dapp = (function(){
                 $('.finished').after('<p class="winner">The winner is: '+web3.toAscii(data.winner).replace(/\0/g,'')+'</p>');
                 $(window).find('.vote_link').hide();
             }
+            managePlaceHolders();
         },
         vote: function(ballotIndex, proposalIndex){
             var transactionData = contract.vote.getData(chainPerson, ballotIndex, proposalIndex);
