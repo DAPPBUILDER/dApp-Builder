@@ -11,7 +11,7 @@
 <div class="container text-center">
     <div class="dapp-block" id="info-block">
         <h1 id="name"></h1>
-        <h4>Balance: <span class="eth_address" id="balance"></span></h4>
+        <h4>Balance: <span class="eth_address" id="balance"></span> ETH</h4>
         <h4>Needed approvals for transactions: <span class="eth_address" id="approvals"></span></h4>
         <h4>Wallet's owners:</h4>
         <div id="owners">
@@ -62,6 +62,9 @@
         <button style="display:none;" type="button" onclick="$('#send-eth-form-submit').click();" class="btn btn-success btn-ok" id="send-eth-button">Send</button>
     </div>
 </div>
+    
+<?php require_once __DIR__ . '/../common/dapp-placeholder.php'; ?>
+    
 <div class="modal" tabindex="-1" role="dialog" id="txn-modal">
     <div class="modal-dialog" role="document">
         <div class="modal-content" style="color: black">
@@ -80,8 +83,14 @@
 <script type="text/javascript" src="assets/js/bootstrap.min.js"></script>
 <script type="text/javascript">
     var dapp = (function(){
-        var contract_address = '0xBb87F856b7dbD307Ba98347a9eC9bF6bA97712DF';
-        var ABI = [{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"uint256"}],"name":"wallets","outputs":[{"name":"name","type":"bytes32"},{"name":"creator","type":"address"},{"name":"id","type":"uint256"},{"name":"allowance","type":"uint256"},{"name":"appovalsreq","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"creator","type":"address"},{"name":"id","type":"uint256"},{"name":"logId","type":"uint256"}],"name":"getLog","outputs":[{"name":"","type":"address"},{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"creator","type":"address"},{"name":"id","type":"uint256"}],"name":"getOwners","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"creator","type":"address"},{"name":"name","type":"bytes32"}],"name":"getWalletId","outputs":[{"name":"","type":"uint256"},{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"creator","type":"address"},{"name":"id","type":"uint256"}],"name":"getTxnNum","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"creator","type":"address"},{"name":"walletId","type":"uint256"},{"name":"id","type":"uint256"}],"name":"getTxn","outputs":[{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"uint256"},{"name":"","type":"bytes"},{"name":"","type":"uint8"},{"name":"","type":"address[]"},{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"creator","type":"address"},{"name":"id","type":"uint256"}],"name":"getLogsNum","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"id","type":"uint256"}],"name":"TxnConfirmed","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"id","type":"uint256"}],"name":"TxnSumbitted","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"id","type":"uint256"}],"name":"WalletCreated","type":"event"},{"constant":false,"inputs":[{"name":"creator","type":"address"},{"name":"walletId","type":"uint256"},{"name":"txId","type":"uint256"}],"name":"confirmTransaction","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"approvals","type":"uint256"},{"name":"owners","type":"address[]"},{"name":"name","type":"bytes32"}],"name":"createWallet","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"creator","type":"address"},{"name":"walletId","type":"uint256"},{"name":"txId","type":"uint256"}],"name":"executeTxn","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"constant":false,"inputs":[{"name":"creator","type":"address"},{"name":"id","type":"uint256"}],"name":"topBalance","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"value","type":"uint256"}],"name":"topUpBalance","type":"event"},{"constant":false,"inputs":[{"name":"creator","type":"address"},{"name":"destination","type":"address"},{"name":"walletId","type":"uint256"},{"name":"value","type":"uint256"},{"name":"data","type":"bytes"}],"name":"submitTransaction","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"}];
+        
+        <?php if ($network == 'main') { ?>
+            var contract_address = '<?php echo MULTISIG_MAIN_ADDRESS; ?>';
+        <?php } elseif ($network == 'rinkeby') { ?>
+            var contract_address = '<?php echo MULTISIG_RINKEBY_ADDRESS; ?>';
+        <?php } ?>
+        
+        var ABI = <?php echo MULTISIG_ABI; ?>;
     
 	return {
             init: function (creator, name) {
@@ -258,7 +267,10 @@
             executeTxn: function(creator, id, txnId){
                 contract.executeTxn(creator, id, txnId, function(e,d){
                     if (d){
-                        console.log('Sent! Tx hash is: '+d);
+                        $('#txn-modal').modal({
+                            keyboard: false,
+                            show: true
+                        })
                     }
                 })
             },
@@ -389,6 +401,9 @@
                         logs_shown = true;
                     }
                 });
+                
+                managePlaceHolders();
+                
                 setInterval(function(){
                     contract.getTxnNum(wallet.creator, wallet.id, function(e,d){
                         if (d){
@@ -465,7 +480,7 @@
                         var wrap = $('<div class="transaction text-left col-md-6"></div>');
                         wrap.append('<div>Transaction id: <span class="eth_address tx-id">'+tx.id+'</span></div>');
                         wrap.append('<div>Destination: <span class="eth_address">'+tx.destination+'</span></div>');
-                        wrap.append('<div>Value: <span class="eth_address">'+tx.value+'</span></div>');
+                        wrap.append('<div>Value: <span class="eth_address">'+tx.value+'</span> ETH</div>');
                         wrap.append('<div>Data: <span class="eth_address">'+tx.data+'</span></div>');
                         var confWrap = $('<div class="confirmedBy">Confirmed by:<div>');
                         tx.confirmed.forEach(function(val,index,arr){
@@ -494,8 +509,8 @@
                         }
                     }
                     if (unsent_count) {
+                        $('#unsent-block').show();
                         if (unsent_count == 1) {
-                            $('#unsent-block').show();
                             $("#unsent-count").html('There is <span class="eth_address">1</span> unsent transaction:');
                         } else {
                             $("#unsent-count").html('There are <span class="eth_address">'+unsent_count+'</span> unsent transactions:');

@@ -25,13 +25,23 @@
 		<button style="display:none;" type="button" class="btn btn-danger btn-cancel" id="cancel">Cancel the Deal</button>
     </div>
 </div>
+    
+<?php require_once __DIR__ . '/../common/dapp-placeholder.php'; ?>
+    
 <script type="text/javascript" src="assets/js/bootstrap.min.js"></script>
 <script type="text/javascript">
 var dapp = (function(){
 	var timerClock;
-	var addressc = '0x51Dd62DfB8bFC468c7Fad54756335dD2319aE3F8';
+        
+        <?php if ($network == 'main') { ?>
+            var addressc = '<?php echo ESCROW_MAIN_ADDRESS; ?>';
+        <?php } elseif ($network == 'rinkeby') { ?>
+            var addressc = '<?php echo ESCROW_RINKEBY_ADDRESS; ?>';
+        <?php } ?>
+        
 	var seller = '<?php echo $key_eth_account; ?>';
-	var ABI = [{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"uint256"}],"name":"bids","outputs":[{"name":"name","type":"bytes32"},{"name":"oracle","type":"address"},{"name":"seller","type":"address"},{"name":"buyer","type":"address"},{"name":"price","type":"uint256"},{"name":"timeout","type":"uint256"},{"name":"status","type":"uint8"},{"name":"fee","type":"uint256"},{"name":"isLimited","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"seller","type":"address"},{"name":"name","type":"bytes32"}],"name":"getBidIndex","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"seller","type":"address"},{"name":"bidId","type":"uint256"}],"name":"refund","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"seller","type":"address"},{"name":"bidId","type":"uint256"}],"name":"sendAmount","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"name","type":"bytes32"},{"name":"seller","type":"address"},{"name":"oracle","type":"address"},{"name":"buyer","type":"address"},{"name":"price","type":"uint256"},{"name":"timeout","type":"uint256"},{"name":"fee","type":"uint256"}],"name":"createBid","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"seller","type":"address"},{"name":"bidId","type":"uint256"}],"name":"rejectBid","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"seller","type":"address"},{"name":"bidId","type":"uint256"}],"name":"closeBid","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"pendingWithdrawals","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"seller","type":"address"}],"name":"getBidsNum","outputs":[{"name":"bidsNum","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"seller","type":"address"},{"indexed":false,"name":"bidId","type":"uint256"}],"name":"amountRecieved","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"seller","type":"address"},{"indexed":false,"name":"bidId","type":"uint256"}],"name":"bidClosed","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"seller","type":"address"},{"indexed":false,"name":"name","type":"bytes32"},{"indexed":false,"name":"bidId","type":"uint256"}],"name":"bidCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"seller","type":"address"},{"indexed":false,"name":"bidId","type":"uint256"}],"name":"refundDone","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"person","type":"address"},{"indexed":false,"name":"amount","type":"uint256"}],"name":"withdrawDone","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"seller","type":"address"},{"indexed":false,"name":"bidId","type":"uint256"}],"name":"bidRejected","type":"event"}];
+        
+	var ABI = <?php echo ESCROW_ABI; ?>;
 
 	return {
 		init: function(name){
@@ -62,7 +72,8 @@ var dapp = (function(){
 		},
 		render: function(bid){
 			console.log(bid);
-			$('#name').html(web3.toAscii(bid[0]).replace(/\0/g,''));
+                        var escrow_name = web3.toAscii(bid[0]).replace(/\0/g,'');
+			$('#name').html(escrow_name);
 			$('#seller').html(bid[2]);
 			$('#buyer').html(bid[3]);
 			$('#oracle').html(bid[1]);
@@ -164,6 +175,8 @@ var dapp = (function(){
 				}
 			});*/
 			
+                        if (escrow_name) managePlaceHolders();
+                        
 			timerClock = setInterval(function(){
 				web3.eth.getBlockNumber(function(e,result){
 					var blockNumber = result;
