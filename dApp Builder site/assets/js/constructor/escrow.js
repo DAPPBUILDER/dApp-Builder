@@ -1,10 +1,17 @@
 var escrowDapp = (function(){
-	var escrowContractAddress = '0x51Dd62DfB8bFC468c7Fad54756335dD2319aE3F8';
-	var escrowContractABI = [{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"uint256"}],"name":"bids","outputs":[{"name":"name","type":"bytes32"},{"name":"oracle","type":"address"},{"name":"seller","type":"address"},{"name":"buyer","type":"address"},{"name":"price","type":"uint256"},{"name":"timeout","type":"uint256"},{"name":"status","type":"uint8"},{"name":"fee","type":"uint256"},{"name":"isLimited","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"seller","type":"address"},{"name":"name","type":"bytes32"}],"name":"getBidIndex","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"seller","type":"address"},{"name":"bidId","type":"uint256"}],"name":"refund","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"seller","type":"address"},{"name":"bidId","type":"uint256"}],"name":"sendAmount","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"name","type":"bytes32"},{"name":"seller","type":"address"},{"name":"oracle","type":"address"},{"name":"buyer","type":"address"},{"name":"price","type":"uint256"},{"name":"timeout","type":"uint256"},{"name":"fee","type":"uint256"}],"name":"createBid","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"seller","type":"address"},{"name":"bidId","type":"uint256"}],"name":"rejectBid","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"seller","type":"address"},{"name":"bidId","type":"uint256"}],"name":"closeBid","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"pendingWithdrawals","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"seller","type":"address"}],"name":"getBidsNum","outputs":[{"name":"bidsNum","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"seller","type":"address"},{"indexed":false,"name":"bidId","type":"uint256"}],"name":"amountRecieved","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"seller","type":"address"},{"indexed":false,"name":"bidId","type":"uint256"}],"name":"bidClosed","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"seller","type":"address"},{"indexed":false,"name":"name","type":"bytes32"},{"indexed":false,"name":"bidId","type":"uint256"}],"name":"bidCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"seller","type":"address"},{"indexed":false,"name":"bidId","type":"uint256"}],"name":"refundDone","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"person","type":"address"},{"indexed":false,"name":"amount","type":"uint256"}],"name":"withdrawDone","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"seller","type":"address"},{"indexed":false,"name":"bidId","type":"uint256"}],"name":"bidRejected","type":"event"}];
+        if (web3.version.network == "1") {
+            var escrowContractAddress = escrowMainAddress;
+            var network = 'main';
+        } else if (web3.version.network == "4") {
+            var escrowContractAddress = escrowRinkebyAddress;
+            var network = 'rinkeby';
+        } else {
+            return;
+        }
 	
 	return {
 		init: function(){
-			window.escrowContract = web3.eth.contract(escrowContractABI).at(escrowContractAddress);
+			window.escrowContract = web3.eth.contract(escrowABI).at(escrowContractAddress);
 			this.event();
 		},
 		create: function(){
@@ -31,7 +38,7 @@ var escrowDapp = (function(){
 				}, function(er,da){
 					console.log(da);
 					if (!er && da) {
-						addApp(type, pure_name, seller);
+						addApp(type, pure_name, network, seller);
 					}
 				})
 			})
@@ -83,10 +90,18 @@ var escrowDapp = (function(){
 										success: function(data, status){
 											if (!data.error && data.success) {
 												if (redirect) {
-													location.href = '/builder/my-dapps.php';
+                                                                                                    if (network == "main") {
+                                                                                                        location.href = '/builder/my-dapps.php';
+                                                                                                    } else if (network == "rinkeby") {
+                                                                                                        location.href = '/builder/my-dapps.php?network=rinkeby';
+                                                                                                    }
 												} else {
 													delete window.escrowUndeployed[id];
-													$("#my-dapps-li").fadeIn();
+													if (network == "main") {
+                                                                                                            $("#my-dapps-li").fadeIn();
+                                                                                                        } else if (network == "rinkeby") {
+                                                                                                            $("#my-test-dapps-li").fadeIn();
+                                                                                                        }
 												}
 											}
 										}
@@ -106,6 +121,11 @@ var escrowDapp = (function(){
 			createdEvent.watch(function(e,d){
 				console.log(d.args);
 			})*/
+                        if (network == "main") {
+                            window.escrowUndeployed = window.escrowMainUndeployed;
+                        } else if (network == "rinkeby") {
+                            window.escrowUndeployed = window.escrowRinkebyUndeployed;
+                        }
 			if (!$.isEmptyObject(window.escrowUndeployed)) {
 				setInterval(function(){
 					for (var key in window.escrowUndeployed) {
