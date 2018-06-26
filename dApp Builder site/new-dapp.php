@@ -6,21 +6,12 @@ session_start();
 $currentUser = Helper::getCurrentUser();
 
 if (!$currentUser) {
-	header('Location: /builder/');
+	header('Location: /login.php?redirect=builder');
 	exit;
 }
 
 //Profile data
-$id = $currentUser->getId();
-$username = $currentUser->getUsername();
-$application = $currentUser->getApplication();
-$api_id = $currentUser->getApiId();
-$api_key = $currentUser->getApiKey();
-$google_id = $currentUser->getGoogleIdentity();
-$deployed_dapps = $currentUser->getDeployedDapps();
-$undeployed_dapps = $currentUser->getUndeployedDapps();
-$added_dapps = $currentUser->getAddedDapps();
-$bonus_tokens = $currentUser->getBonusTokens();
+require_once 'common/profiledata.php';
 
 require_once('common/header.php');
 ?>
@@ -63,10 +54,10 @@ require_once('common/header.php');
 									<select class="form-control" aria-describedby="dapp-type-label" id="dapp-type-select" required>
 										<option value="voting">Voting</option>
 										<option value="escrow">Escrow</option>
-                                                                                <option value="multisig">Multisignature Wallet</option>
+										<option value="multisig">Multisignature Wallet</option>
+										<option value="betting">Betting</option>
 									</select>
 								</div>
-
 
 								<ul class="nav nav-tabs text-center">     
 									<li class="active dapp-tab" data-value="voting">
@@ -79,15 +70,20 @@ require_once('common/header.php');
 								   		<img src="assets/images/Escrow.png" alt="Escrow" /><br>
 								   		<p class="text-center" >Escrow</p></a>
 									</li>
-                                                                        <li class="dapp-tab text-center" data-value="multisig"> 
+									<li class="dapp-tab text-center" data-value="multisig">
 								   		<a style="font-size: 14px; padding-left: 18px; height: 127px;" data-toggle="tab" href="#">
 								   		<img style="margin-left: 10px; margin-bottom: 22px;" src="assets/images/Multisig.png" alt="Multisignature Wallet" /><br>
-                                                                                <p class="text-center" style="font-size: 14px; margin-bottom: 0; padding-bottom: 0;line-height: 0.6;">Multisignature</p>
-                                                                                <p class="text-center" style="font-size: 14px; margin-top: 0; padding-top: 0; line-height: 2;padding-left: 10px;">Wallet</p></a>
-                                                                        </li>
+											<p class="text-center" style="font-size: 14px; margin-bottom: 0; padding-bottom: 0;line-height: 0.6;">Multisignature</p>
+											<p class="text-center" style="font-size: 14px; margin-top: 0; padding-top: 0; line-height: 2;padding-left: 10px;">Wallet</p></a>
+									</li>
+									<li class="dapp-tab" data-value="betting">
+										<a style="padding-left: 18px; height: 127px;" data-toggle="tab" href="#">
+										<img style="margin-left: 10px; margin-bottom: 22px;" src="assets/images/Betting.png" alt="Multisignature Wallet" /><br>
+											<p class="text-center">Betting</p></a>
+									</li>
 								</ul>
 
-
+								<div class="clearfix"></div>
 								
 								<div id="voting-dapp" class="dapp-type-block">
 									<div class="input-group creation-form">
@@ -162,33 +158,33 @@ require_once('common/header.php');
 									</div>
 								</div>
                                                             
-                                                                <div id="multisig-dapp" class="dapp-type-block">
-                                                                        <div class="input-group creation-form">
+								<div id="multisig-dapp" class="dapp-type-block">
+									<div class="input-group creation-form">
 										<span class="input-group-addon">Initial balance (ETH):</span>
 										<input id="multisig-balance" min="0" step="0.001" value="0" type="number" class="form-control required-multisig required-dapp">
 									</div>
                                                                     
-                                                                        <div class="input-group creation-form">
+									<div class="input-group creation-form">
 										<span class="input-group-addon">Approvals number to confirm a transaction:</span>
 										<input id="multisig-approvals" min="1" step="1" value="2" type="number" class="form-control required-multisig required-dapp">
 									</div>
                                                                     
 									<h4 class="text-center">Owners:</h4>
 									<div id="multisig-owners">
-                                                                            <div class="input-group creation-form">
-                                                                                <span class="input-group-addon">Owner:</span>
-                                                                                <input id="multisig-first-owner" placeholder="0x0000000000000000000000000000000000000000" type="text" class="form-control required-multisig required-dapp">
-                                                                                <span class="input-group-btn">
-                                                                                    <button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>
-                                                                                </span>
-                                                                            </div>
+										<div class="input-group creation-form">
+											<span class="input-group-addon">Owner:</span>
+											<input id="multisig-first-owner" placeholder="0x0000000000000000000000000000000000000000" type="text" class="form-control required-multisig required-dapp">
+											<span class="input-group-btn">
+												<button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>
+											</span>
+										</div>
 									    <div class="input-group creation-form">
-                                                                                <span class="input-group-addon">Owner:</span>
-                                                                                <input placeholder="0x0000000000000000000000000000000000000000" type="text" class="form-control required-multisig required-dapp">
-                                                                                <span class="input-group-btn">
-                                                                                    <button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>
-                                                                                </span>
-                                                                            </div>
+											<span class="input-group-addon">Owner:</span>
+											<input placeholder="0x0000000000000000000000000000000000000000" type="text" class="form-control required-multisig required-dapp">
+											<span class="input-group-btn">
+											<button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>
+											</span>
+										</div>
 									</div>
 									<div class="text-center creation-form">
 										<button type="button" id="multisig-add-owner" class="btn btn-primary">Add an Owner</button>
@@ -196,9 +192,42 @@ require_once('common/header.php');
 										<button type="button" style="display:none;" id="create-multisig-dapp"></button>
 									</div>
 								</div>
-								
-								
-								
+
+								<div id="betting-dapp" class="dapp-type-block">
+									<div class="input-group creation-form eth-address-group">
+										<span class="input-group-addon">Arbitrator:</span>
+										<input id="betting-arbitrator" type="text" placeholder="0x0000000000000000000000000000000000000000" class="form-control required-dapp required-betting">
+										<span class="input-group-btn">
+											<button class="btn btn-me" type="button">Me</button>
+										</span>
+									</div>
+									<div class="input-group creation-form">
+										<span class="input-group-addon">Arbitrator's fee (percents):</span>
+										<input id="betting-fee" type="number" value="0" min="0" max="99" class="form-control required-dapp">
+									</div>
+									<h4 class="text-center">List of bids:</h4>
+									<div id="betting-bids">
+										<div class="input-group creation-form">
+											<span class="input-group-addon">Bid's name:</span>
+											<input placeholder="Name.." type="text" class="form-control required-betting required-dapp">
+												<span class="input-group-btn">
+													<button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>
+												</span>
+										</div>
+										<div class="input-group creation-form">
+											<span class="input-group-addon">Bid's name:</span>
+											<input placeholder="Name.." type="text" class="form-control required-betting required-dapp">
+												<span class="input-group-btn">
+													<button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>
+												</span>
+										</div>
+									</div>
+									<div class="text-center creation-form">
+										<button type="button" id="betting-add-bid" class="btn btn-primary">Add a Bid</button>
+										<button type="submit" class="btn btn-primary">Create Betting dApp</button>
+										<button type="button" style="display:none;" id="create-betting-dapp"></button>
+									</div>
+								</div>
 							</div>
 						</form>
 					</div>
@@ -329,9 +358,12 @@ require_once('common/header.php');
 			$("#escrow-dapp").fadeIn();
 			$(".required-escrow").attr("required", "");
 		} else if (type == 'multisig') {
-                        $("#multisig-dapp").fadeIn();
+			$("#multisig-dapp").fadeIn();
 			$(".required-multisig").attr("required", "");
-                }
+		} else if (type == 'betting'){
+			$('#betting-dapp').fadeIn();
+			$(".required-betting").attr("required", "");
+		}
 	}
 	function showError(error, is_static = false) {
 		$("#error-text").html(error);
@@ -343,8 +375,9 @@ require_once('common/header.php');
 			$("#errorModal").modal("show");
 		}
 	}
-	function addApp(type, name, key_account = false) {
-		var data = 'type=' + type + '&name=' + encodeURIComponent(name) + '&eth_account=' + encodeURIComponent(web3.eth.defaultAccount);
+	function addApp(type, name, network, key_account = false) {
+		console.log('Given type to function addApp is:'+type);
+		var data = 'type=' + type + '&name=' + encodeURIComponent(name) + '&eth_account=' + encodeURIComponent(web3.eth.defaultAccount) + '&network=' + network;
 		if (key_account) {
 			data += '&key_eth_account=' + encodeURIComponent(key_account);
 		}
@@ -355,24 +388,29 @@ require_once('common/header.php');
 			cache: false,
 			data: data,
 			error: function(jqXHR, error){},
-			success: function(data, status){
+			success: function(data, status) {
 				if (!data.error && data.success) {
 					$("#successModal").modal({backdrop: 'static', keyboard: false});
 					if (type == 'voting') {
-						setInterval(function(){
+						setInterval(function () {
 							voteDapp.checkDeployed(web3.eth.defaultAccount, name, data.success, true)
 						}, 3000);
 					} else if (type == 'escrow') {
-						setInterval(function(){
+						setInterval(function () {
 							escrowDapp.checkDeployed($("#escrow-seller").val(), name, data.success, true)
 						}, 3000);
 					} else if (type == 'multisig') {
-                                                setInterval(function(){
+						setInterval(function () {
 							multisigDapp.checkDeployed(web3.eth.defaultAccount, name, data.success, true)
 						}, 3000);
-                                        }
-				} else {
-					showError(data.error);
+					} else if (type == 'betting') {
+						console.log('Watching for betting being deployed');
+						setInterval(function () {
+							bettingDapp.checkDeployed(web3.eth.defaultAccount, name, data.success, true)
+						}, 3000);
+					} else {
+						showError(data.error);
+					}
 				}
 			}
 		});
@@ -382,11 +420,11 @@ require_once('common/header.php');
 	}
 	function checkConnection() {
 		if (typeof(web3) == 'undefined' || !web3.eth.defaultAccount) {
-			showError('You do not have Web3 connection, please install <a href="https://metamask.io/" target="_blank">MetaMask</a>, unlock your account, choose the Rinkeby Test Network and update this page', true);
+			showError('You do not have Web3 connection, please install <a href="https://metamask.io/" target="_blank">MetaMask</a>, unlock your account, choose Main Ethereum Network or Rinkeby Test Network and update the page', true);
 			return false;
 		}
-		if (web3.version.network != "4") {
-			showError('The Builder works in Rinkeby Test Network, please choose it in your MetaMask plugin and update the page', true);
+		if (web3.version.network != "1" && web3.version.network != "4") {
+			showError('The Builder works in Main Ethereum Network and in Rinkeby Test Network, please choose it in your MetaMask plugin and update the page', true);
 			return false;
 		}
 		return true;
@@ -529,7 +567,26 @@ require_once('common/header.php');
                         multisigDapp.checkName(web3.eth.defaultAccount, name, function(){
                             $('#create-multisig-dapp').click();
 			});
-                }
+                } else if (type == 'betting'){
+					var bidsNum = $('#betting-bids input').length;
+					if (bidsNum < 2){
+						showError('The number of bids should be not less than 2');
+						return false;
+					}
+					var Arbitratorfee = $('#betting-fee').val();
+					if (Arbitratorfee >= 100 || Arbitratorfee < 0){
+						showError('The fee should be between 0 and 99');
+						return false;
+					}
+					var abritratorAddress = $('#betting-arbitrator').val();
+					if (!web3.isAddress(abritratorAddress)){
+						showError('Please enter valid arbitrator address');
+						return false;
+					}
+					bettingDapp.checkName(web3.eth.defaultAccount, name, function(){
+						$('#create-betting-dapp').click();
+					})
+		}
 		return false;
 	});
 </script>

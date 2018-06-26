@@ -6,21 +6,20 @@ session_start();
 $currentUser = Helper::getCurrentUser();
 
 if (!$currentUser) {
-	header('Location: /builder/');
+	header('Location: /login.php?redirect=builder');
 	exit;
 }
 
 //Profile data
-$id = $currentUser->getId();
-$username = $currentUser->getUsername();
-$application = $currentUser->getApplication();
-$api_id = $currentUser->getApiId();
-$api_key = $currentUser->getApiKey();
-$google_id = $currentUser->getGoogleIdentity();
-$deployed_dapps = $currentUser->getDeployedDapps();
-$undeployed_dapps = $currentUser->getUndeployedDapps();
-$added_dapps = $currentUser->getAddedDapps();
-$bonus_tokens = $currentUser->getBonusTokens();
+require_once 'common/profiledata.php';
+
+if (!empty($_GET['network']) && $_GET['network'] == 'rinkeby') {
+    $network = 'rinkeby';
+    $deployed_dapps = $deployed_rinkeby_dapps;
+} else {
+    $network = 'main';
+    $deployed_dapps = $deployed_main_dapps;
+}
 
 if (!$deployed_dapps) {
 	header('Location: /builder/new-dapp.php');
@@ -63,7 +62,7 @@ require_once('common/header.php');
 								</a>
 							<?php $first = false; } ?>
 						</div>
-						<div class="text-center"><button id="add-widget" type="button" class="btn btn-primary">Add selected dApp as widget into mobile App</button></div>
+                                                <div class="text-center"><button id="add-widget" type="button" class="btn btn-primary">Add selected dApp as widget into mobile App</button></div>
 						<div class="text-center"><a class="btn btn-default" id="customize-template" style="cursor:pointer;">Customize the dApp's template</a></div>
 						
 						<div class="desktoplink text-center">
@@ -80,7 +79,7 @@ require_once('common/header.php');
 							data-url=""
 							data-icons-file="icons.png"
 							data-path="/builder/assets/share42/"
-							data-image="https://dapps.ibuildapp.com/builder/assets/images/dappimg.png"
+							data-image="https://dappbuilder.io/builder/assets/images/dappimg.png"
 							>
 							</div>
 
@@ -331,6 +330,80 @@ require_once('common/header.php');
 			</div>
 		</div>
 	</div>
+<?php } elseif ($dapp->getDappType() == 'betting') { ?>
+	<div id="templateModal<?php echo $dapp->getId(); ?>" class="modal fade" role="dialog" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header text-center">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h2>Template Settings</h2>
+				</div>
+				<div class="modal-body">
+					<form method="post" class="template-form">
+						<div class="one-settings">
+							<p class="text-center">Background color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="background_color" type="text" class="form-control input-lg" value="<?php echo $interface['background_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Text color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="text_color" type="text" class="form-control input-lg" value="<?php echo $interface['text_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+						
+						<div class="one-settings">
+							<p class="text-center">Headers color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="headers_color" type="text" class="form-control input-lg" value="<?php echo $interface['headers_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div style="display:none;" class="one-settings">
+							<p class="text-center">Links color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="links_color" type="text" class="form-control input-lg" value="<?php echo $interface['links_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Ethereum addresses color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="eth_addresses_color" type="text" class="form-control input-lg" value="<?php echo $interface['eth_addresses_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Bet/Ok buttons color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="ok_buttons_color" type="text" class="form-control input-lg" value="<?php echo $interface['ok_buttons_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="one-settings">
+							<p class="text-center">Navigation buttons color:</p>
+							<div class="input-group colorpicker-component colorpicker-input">
+								<input name="cancel_buttons_color" type="text" class="form-control input-lg" value="<?php echo $interface['cancel_buttons_color']; ?>" required>
+								<span class="input-group-addon"><i></i></span>
+							</div>
+						</div>
+
+						<div class="text-center" style="padding-top:15px;">
+							<button type="submit" class="btn btn-primary">Save</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 <?php } } ?>
 
 <script type="text/javascript" src="assets/js/bootstrap-colorpicker.min.js"></script>
@@ -353,7 +426,7 @@ require_once('common/header.php');
 	function showInterface(time = false) {
 		var id = $("#dapps-list a.active").attr("data-id");
 		current_dapp = id;
-		var link = "https://dapps.ibuildapp.com/builder/dapp.php?id=" + id;
+		var link = "https://dappbuilder.io/builder/dapp.php?id=" + id;
 		if (time) link += "&time=" + time;
 		else {
 			$("#dapp-link").val(link);

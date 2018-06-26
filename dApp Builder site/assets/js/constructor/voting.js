@@ -1,10 +1,18 @@
 var voteDapp = (function(){
-	var voteContractAdress = '0x6f79417f9ef721e0c2d6f0843e6084d79386dcbd';
-	var voteContractABI = [{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"}],"name":"getVoted","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"proposalNum","type":"uint256"}],"name":"vote","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"uint256"}],"name":"ballots","outputs":[{"name":"name","type":"bytes32"},{"name":"chainperson","type":"address"},{"name":"blind","type":"bool"},{"name":"finished","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"ballot","type":"bytes32"}],"name":"finishBallot","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"}],"name":"getProposalsNum","outputs":[{"name":"count","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"}],"name":"isVoted","outputs":[{"name":"result","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"proposalName","type":"bytes32"}],"name":"getProposalIndex","outputs":[{"name":"index","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballotName","type":"bytes32"}],"name":"getBallotIndex","outputs":[{"name":"index","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballotIndex","type":"uint256"}],"name":"getWinner","outputs":[{"name":"winnerName","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"proposalName","type":"bytes32"}],"name":"getVotesCount","outputs":[{"name":"count","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"},{"name":"","type":"uint256"},{"name":"","type":"uint256"}],"name":"proposals","outputs":[{"name":"name","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"}],"name":"getBallotsNum","outputs":[{"name":"count","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"ballotName","type":"bytes32"},{"name":"blindParam","type":"bool"},{"name":"proposalNames","type":"bytes32[]"}],"name":"startNewBallot","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"chainperson","type":"address"},{"name":"ballot","type":"uint256"},{"name":"voter","type":"address"}],"name":"getVotedData","outputs":[{"name":"proposalNum","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"votedPerson","type":"address"},{"indexed":false,"name":"proposalIndex","type":"uint256"}],"name":"Vote","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"finished","type":"bool"}],"name":"Finish","type":"event"}];
+    if (web3.version.network == "1") {
+        var voteContractAdress = votingMainAddress;
+        var network = 'main';
+    } else if (web3.version.network == "4") {
+        var voteContractAdress = votingRinkebyAddress;
+        var network = 'rinkeby';
+    } else {
+        return;
+    }
+        
     return {
         init: function(){
             window.web3 = new Web3(web3.currentProvider);
-            window.voteContract = web3.eth.contract(voteContractABI).at(voteContractAdress);
+            window.voteContract = web3.eth.contract(votingABI).at(voteContractAdress);
             this.event();
         },
         event: function(){
@@ -51,14 +59,18 @@ var voteDapp = (function(){
                             },
                             function(e,d){
 								if (!e && d) {
-									addApp(type, pure_name);
+									addApp(type, pure_name, network);
 								}
                             })
                     }
                 });
                 return false;
             });
-			
+			if (network == "main") {
+                            window.votingUndeployed = window.votingMainUndeployed;
+                        } else if (network == "rinkeby") {
+                            window.votingUndeployed = window.votingRinkebyUndeployed;
+                        }
 			if (!$.isEmptyObject(window.votingUndeployed)) {
 				setInterval(function(){
 					for (var key in window.votingUndeployed) {
@@ -115,10 +127,18 @@ var voteDapp = (function(){
 										success: function(data, status){
 											if (!data.error && data.success) {
 												if (redirect) {
-													location.href = '/builder/my-dapps.php';
+                                                                                                    if (network == "main") {
+                                                                                                        location.href = '/builder/my-dapps.php';
+                                                                                                    } else if (network == "rinkeby") {
+                                                                                                        location.href = '/builder/my-dapps.php?network=rinkeby';
+                                                                                                    }	
 												} else {
 													delete window.votingUndeployed[id];
-													$("#my-dapps-li").fadeIn();
+													if (network == "main") {
+                                                                                                            $("#my-dapps-li").fadeIn();
+                                                                                                        } else if (network == "rinkeby") {
+                                                                                                            $("#my-test-dapps-li").fadeIn();
+                                                                                                        }
 												}
 											}
 										}

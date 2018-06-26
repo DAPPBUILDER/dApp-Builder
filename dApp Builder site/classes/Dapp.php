@@ -10,6 +10,7 @@ class Dapp {
 	private $key_eth_account;
 	private $interface;
 	private $added;
+    private $network;
 	
 	public function getId(){
         return $this->id;
@@ -29,6 +30,10 @@ class Dapp {
 	
 	public function getKeyEthAccount(){
 		return $this->key_eth_account;
+	}
+        
+        public function getNetwork(){
+		return $this->network;
 	}
 	
 	public function getInterface(){
@@ -56,8 +61,18 @@ class Dapp {
 						'cancel_buttons_color' => '#0579a2',
 						'headers_color' => '#1fe284'
 					);
-                case 'multisig':
-                    return array(
+                                case 'multisig':
+                                        return array(
+						'background_color' => '#00324e',
+						'text_color' => '#ffffff',
+						'links_color' => '#aaaaaa',
+						'eth_addresses_color' => '#1fe284',
+						'ok_buttons_color' => '#07c58e',
+						'cancel_buttons_color' => '#0579a2',
+						'headers_color' => '#1fe284'
+					);
+				case 'betting':
+					return array(
 						'background_color' => '#00324e',
 						'text_color' => '#ffffff',
 						'links_color' => '#aaaaaa',

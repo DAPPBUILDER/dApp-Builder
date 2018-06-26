@@ -22,6 +22,7 @@ try {
 	$query->execute();
 	$dapp = $query->fetchObject('Dapp');
 } catch (PDOException $e) {
+	//echo json_encode(array('error'=>$e->getMessage()));
 	exit;
 }
 
@@ -33,11 +34,29 @@ try {
 	$query->bindParam(':user', $user);
 	$query->execute();
 } catch (PDOException $e) {
+	//echo json_encode(array('error'=>$e->getMessage()));
 	exit;
 }
 
-$dapp_name = $dapp->getName();
+if ($dapp->getNetwork() == 'main') {
+    //Bonus ETH address
+    if (!$currentUser->getBonusEthAddress()) {
+        $deploy_address = $dapp->getEthAccount();
+        try {
+            $query = $db->prepare("UPDATE `users` SET `bonus_eth_address` = :deploy_address WHERE `id` = :user AND (`bonus_eth_address` = '' OR `bonus_eth_address` IS NULL)");
+            $query->bindParam(':deploy_address', $deploy_address);
+            $query->bindParam(':user', $user);
+            $query->execute();
+        } catch (PDOException $e) {
+            //echo json_encode(array('error'=>$e->getMessage()));
+            exit;
+        }
+    }
 
-$to = $email;
+    //Bonus tokens
+    $currentUser->accrueTokens(BONUS_CREATE_DAPP, 'create_dapp', $id);
+}
+
+$dapp_name = $dapp->getName();
 
 echo json_encode(array('success'=>'success'));

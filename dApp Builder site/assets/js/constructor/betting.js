@@ -1,37 +1,41 @@
-var multisigDapp = (function(){
+/**
+ * Created by Fivehundreth on 04.04.2018.
+ */
+
+var bettingDapp = (function(){
     if (web3.version.network == "1") {
-        var multisigContractAddress = multisigMainAddress;
+        var bettingContractAddress = bettingMainAddress;
         var network = 'main';
     } else if (web3.version.network == "4") {
-        var multisigContractAddress = multisigRinkebyAddress;
+        var bettingContractAddress = bettingRinkebyAddress;
         var network = 'rinkeby';
     } else {
         return;
     }
-    
+
     return {
         init: function(){
-            window.multisigContract = web3.eth.contract(multisigABI).at(multisigContractAddress);
+            window.bettingContract = web3.eth.contract(bettingABI).at(bettingContractAddress);
             this.triggers();
         },
-        create: function(approvals, owners, name, value){
+        create: function(arbitrator, fee, name, bids){
             pure_name = name;
             name = web3.toHex(name);
-            type = "multisig";
-            console.log(name);
-            let transactionData = multisigContract.createWallet.getData(approvals, owners, name);
+            type = "betting";
+            //console.log(name);
+            let transactionData = bettingContract.createEvent.getData(name, bids, arbitrator, fee);
             web3.eth.estimateGas({
-                to: multisigContractAddress,
+                to: bettingContractAddress,
                 data: transactionData,
-                value: web3.toWei(value, 'ether')
             }, function(e,d){
                 web3.eth.sendTransaction({
-                    to: multisigContractAddress,
+                    to: bettingContractAddress,
                     data: transactionData,
                     gas: d,
-                    value: web3.toWei(value, 'ether')
                 }, function(e,d){
+                    console.log(e,d);
                     if (!e && d) {
+                        console.log('Adding dapp...');
                         addApp(type, pure_name, network);
                     }
                 })
@@ -39,55 +43,53 @@ var multisigDapp = (function(){
         },
         triggers: function(){
             var that = this;
-            $('#multisig-first-owner').val(web3.eth.defaultAccount);
-            $('#multisig-add-owner').click(function(){
-                $('#multisig-owners').append(
+            $('#betting-add-bid').click(function(){
+                $('#betting-bids').append(
                     '<div style="display:none;" class="input-group creation-form">' +
-                        '<span class="input-group-addon">Owner:</span>' +
-                        '<input required placeholder="0x0000000000000000000000000000000000000000" type="text" class="form-control required-multisig required-dapp">' +
-                        '<span class="input-group-btn">' +
-                            '<button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>' +
-                        '</span>' +
+                    '<span class="input-group-addon">Bid\'s name:</span>' +
+                    '<input placeholder="Name..." required type="text" class="form-control required-betting required-dapp">' +
+                    '<span class="input-group-btn">' +
+                    '<button class="btn btn-danger btn-remove" type="button"><i class="fa fa-fw fa-times"></i></button>' +
+                    '</span>' +
                     '</div>'
                 );
-                $('#multisig-owners>div').fadeIn();
+                $('#betting-bids>div').fadeIn();
                 return false;
             });
-            $("#multisig-owners").on('click', '.btn-remove', function(){
+            $("#betting-bids").on('click', '.btn-remove', function(){
                 $(this).parents(".creation-form").fadeOut(function(){$(this).remove()});
             });
-            $('#create-multisig-dapp').click(function(){
+            $('#create-betting-dapp').click(function(){
+                var arbitrator = $('#betting-arbitrator').val();
+                var fee = $('#betting-fee').val();
                 var name = $('#dapp-name').val();
-                var value = parseFloat($('#multisig-balance').val());
-                var approvals = parseInt($("#multisig-approvals").val());
-                var addresses = $('#multisig-owners input');
-                var owners = [];
-                addresses.each(function(){
-                    let address = $(this).val();
-                    if (address){
-                        owners.push(address);
+                var names = $('#betting-bids input');
+                var bids = [];
+                names.each(function(){
+                    let name = $(this).val();
+                    if (name){
+                        bids.push(web3.toHex(name));
                     }
                 });
-                console.log(owners);
-                that.create(approvals, owners, name, value);
+                that.create(arbitrator, fee, name, bids);
             });
-            
+
             if (network == "main") {
-                window.multisigUndeployed = window.multisigMainUndeployed;
+                window.bettingUndeployed = window.bettingMainUndeployed;
             } else if (network == "rinkeby") {
-                window.multisigUndeployed = window.multisigRinkebyUndeployed;
+                window.bettingUndeployed = window.bettingRinkebyUndeployed;
             }
-            
-            if (!$.isEmptyObject(window.multisigUndeployed)) {
+
+            if (!$.isEmptyObject(window.bettingUndeployed)) {
                 setInterval(function(){
-                    for (var key in window.multisigUndeployed) {
-                        multisigDapp.checkDeployed(window.multisigUndeployed[key].address, window.multisigUndeployed[key].name, key);
+                    for (var key in window.bettingUndeployed) {
+                        bettingDapp.checkDeployed(window.bettingUndeployed[key].address, window.bettingUndeployed[key].name, key);
                     }
                 }, 3000);
             }
         },
         checkName: function(creator, name, callback){
-            multisigContract.getWalletId(creator, name, function(e,d){
+            bettingContract.getEventId(creator, name, function(e,d){
                 if (d) {
                     if (d[1]) {
                         showNameError();
@@ -98,7 +100,8 @@ var multisigDapp = (function(){
             });
         },
         checkDeployed: function(address, name, id, redirect = false){
-            multisigContract.getWalletId(address, name, function(e,d){
+            console.log('Checking deployed dapp...');
+            bettingContract.getEventId(address, name, function(e,d){
                 if (d) {
                     if (d[1]) {
                         $.ajax({
@@ -117,7 +120,7 @@ var multisigDapp = (function(){
                                             location.href = '/builder/my-dapps.php?network=rinkeby';
                                         }
                                     } else {
-                                        delete window.multisigUndeployed[id];
+                                        delete window.bettingUndeployed[id];
                                         if (network == "main") {
                                             $("#my-dapps-li").fadeIn();
                                         } else if (network == "rinkeby") {
@@ -135,5 +138,5 @@ var multisigDapp = (function(){
 })()
 
 window.addEventListener('load', function(){
-    multisigDapp.init();
+    bettingDapp.init();
 });
