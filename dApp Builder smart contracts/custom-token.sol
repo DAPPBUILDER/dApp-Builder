@@ -46,7 +46,7 @@ library SafeMath {
   }
 }
 
-contract iToken{
+contract customToken{
     using SafeMath for uint256;
     
     /* Events */
