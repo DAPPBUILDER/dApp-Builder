@@ -16,6 +16,7 @@ $user = $currentUser->getId();
 $created_at = time();
 $eth_account = $_POST['eth_account'];
 $key_eth_account = empty($_POST['key_eth_account']) ? '' : $_POST['key_eth_account'];
+$address = empty($_POST['address']) ? '' : $_POST['address'];
 
 $db = db::getInstance();
 

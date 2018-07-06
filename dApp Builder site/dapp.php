@@ -3,9 +3,6 @@
 if (empty($_GET['id'])) exit;
 
 require_once('classes/Helper.php');
-session_start();
-
-$currentUser = Helper::getCurrentUser();
 
 $id = $_GET['id'];
 
@@ -19,9 +16,11 @@ if (!$dapp) exit;
 
 $type = $dapp->getDappType();
 $name = $dapp->getName();
+$address = $dapp->getAddress();
 $eth_account = $dapp->getEthAccount();
 $key_eth_account = $dapp->getKeyEthAccount();
 $interface = $dapp->getInterface();
+$network = $dapp->getNetwork();
 
 switch ($type) {
     case 'voting':
@@ -32,5 +31,11 @@ switch ($type) {
         break;
     case 'multisig':
         require_once 'dapps/multisig.php';
+        break;
+    case 'betting':
+        require_once 'dapps/betting.php';
+        break;
+    case 'custom-token':
+        require_once 'dapps/custom-token.php';
         break;
 }
