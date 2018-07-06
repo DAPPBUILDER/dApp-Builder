@@ -3,6 +3,7 @@
 if (empty($_POST['id'])) exit;
 
 require_once('classes/Helper.php');
+require_once('classes/SendGrid.php');
 session_start();
 
 $currentUser = Helper::getCurrentUser();
@@ -10,6 +11,7 @@ $currentUser = Helper::getCurrentUser();
 if (!$currentUser) exit;
 
 $id = $_POST['id'];
+$address = empty($_POST['address']) ? '' : $_POST['address'];
 $user = $currentUser->getId();
 $email = $currentUser->getEmail();
 
@@ -22,19 +24,18 @@ try {
 	$query->execute();
 	$dapp = $query->fetchObject('Dapp');
 } catch (PDOException $e) {
-	//echo json_encode(array('error'=>$e->getMessage()));
 	exit;
 }
 
 if (empty($dapp)) exit;
 
 try {
-	$query = $db->prepare('UPDATE `dapps` SET `deployed` = 1 WHERE `user` = :user AND `id` = :id');
+	$query = $db->prepare('UPDATE `dapps` SET `deployed` = 1, `address`=:address WHERE `user` = :user AND `id` = :id');
 	$query->bindParam(':id', $id);
 	$query->bindParam(':user', $user);
+	$query->bindParam(':address', $address);
 	$query->execute();
 } catch (PDOException $e) {
-	//echo json_encode(array('error'=>$e->getMessage()));
 	exit;
 }
 
@@ -48,7 +49,6 @@ if ($dapp->getNetwork() == 'main') {
             $query->bindParam(':user', $user);
             $query->execute();
         } catch (PDOException $e) {
-            //echo json_encode(array('error'=>$e->getMessage()));
             exit;
         }
     }
