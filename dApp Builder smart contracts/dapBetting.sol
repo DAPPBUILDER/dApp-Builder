@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 contract dapBetting {
     
@@ -20,6 +20,9 @@ contract dapBetting {
         address arbitrator;
         bytes32 winner;
         uint arbitratorFee;
+        uint256 endBlock;
+        uint256 minBid;
+        uint256 maxBid;
         bid[] bids;
         bet[] bets;
         eventStatus status;
@@ -38,7 +41,7 @@ contract dapBetting {
     
     /* Events */
     
-    event EventCreated(uint id, address creator);
+    event eventCreated(uint id, address creator);
     event betMade(uint value, uint id);
     event eventStatusChanged(uint status);
     event withdrawalDone(uint amount);
@@ -56,7 +59,7 @@ contract dapBetting {
     }
     /* Methods */
     
-    function createEvent(bytes32 name, bytes32[] names, address arbitrator, uint fee) external{
+    function createEvent(bytes32 name, bytes32[] names, address arbitrator, uint fee, uint256 endBlock, uint256 minBid, uint256 maxBid) external{
         
         require(fee < 100);
         /* check whether event with such name already exist */
@@ -79,6 +82,9 @@ contract dapBetting {
         betEvents[msg.sender][newId].arbitrator = arbitrator;
         betEvents[msg.sender][newId].status = eventStatus.open;
         betEvents[msg.sender][newId].creator = msg.sender;
+        betEvents[msg.sender][newId].endBlock = endBlock;
+        betEvents[msg.sender][newId].minBid = minBid;
+        betEvents[msg.sender][newId].maxBid = maxBid;
         betEvents[msg.sender][newId].arbitratorFee = fee;
         
         for (uint8 i = 0;i < names.length; i++){
@@ -87,7 +93,7 @@ contract dapBetting {
             betEvents[msg.sender][newId].bids[newBidId].id = newBidId;
         }
         
-        emit EventCreated(newId, msg.sender);
+        emit eventCreated(newId, msg.sender);
     }
     
     function makeBet(address creator, uint eventId, bytes32 bidName) payable external{
@@ -101,6 +107,18 @@ contract dapBetting {
             }
         }
         require(found);
+        //check for block
+        if (betEvents[creator][eventId].endBlock > 0){
+        	require(betEvents[creator][eventId].endBlock < block.number);
+        }
+        //check for minimal amount
+        if (betEvents[creator][eventId].minBid > 0){
+        	require(msg.value > betEvents[creator][eventId].minBid);
+        }
+        //check for maximal amount
+        if (betEvents[creator][eventId].maxBid > 0){
+        	require(msg.value < betEvents[creator][eventId].maxBid);
+        }
         foundBid.whoBet.push(msg.sender);
         foundBid.amountReceived += msg.value;
         uint newBetId = betEvents[creator][eventId].bets.length++;
@@ -112,6 +130,10 @@ contract dapBetting {
     }
     
     function finishEvent(address creator, uint eventId) external{
+    	//check for block
+    	if (betEvents[creator][eventId].endBlock > 0){
+    		require(betEvents[creator][eventId].endBlock < block.number);
+    	}
         require(betEvents[creator][eventId].status == eventStatus.open);
         require(msg.sender == betEvents[creator][eventId].arbitrator);
         betEvents[creator][eventId].status = eventStatus.finished;
