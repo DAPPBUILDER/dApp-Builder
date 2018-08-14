@@ -48,7 +48,7 @@ contract dapBetting {
     
     /* Modifiers */
     modifier onlyFinished(address creator, uint eventId){
-        if (betEvents[creator][eventId].status == eventStatus.finished){
+        if (betEvents[creator][eventId].status == eventStatus.finished || betEvents[creator][eventId].endBlock < block.number){
             _;
         }
     }
@@ -98,6 +98,9 @@ contract dapBetting {
     
     function makeBet(address creator, uint eventId, bytes32 bidName) payable external{
         require(betEvents[creator][eventId].status == eventStatus.open);
+        if (betEvents[creator][eventId].endBlock > 0){
+        	require(block.number > betEvents[creator][eventId].endBlock);
+        }
         /* check whether bid with given name actually exists */
         bool found;
         for (uint8 i=0;i<betEvents[creator][eventId].bids.length;i++){
@@ -130,11 +133,7 @@ contract dapBetting {
     }
     
     function finishEvent(address creator, uint eventId) external{
-    	//check for block
-    	if (betEvents[creator][eventId].endBlock > 0){
-    		require(betEvents[creator][eventId].endBlock < block.number);
-    	}
-        require(betEvents[creator][eventId].status == eventStatus.open);
+        require(betEvents[creator][eventId].status == eventStatus.open && betEvents[creator][eventId].endBlock == 0);
         require(msg.sender == betEvents[creator][eventId].arbitrator);
         betEvents[creator][eventId].status = eventStatus.finished;
         emit eventStatusChanged(1);
