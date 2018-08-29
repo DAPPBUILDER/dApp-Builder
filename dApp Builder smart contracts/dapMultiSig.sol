@@ -83,7 +83,7 @@ contract dapMultisig {
     */
 
     function getOwners() external view returns (address[]){
-        owners;
+        return owners;
     }
     
     function getTxnNum() external view returns (uint){
