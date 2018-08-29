@@ -1,5 +1,5 @@
 pragma solidity 0.4.24;
-contract ibaMultisig {
+contract dapMultisig {
 
     /*
     * Types
@@ -73,6 +73,11 @@ contract ibaMultisig {
         emit WalletCreated(msg.sender, _owners);
     }
 
+    //fallback to accept funds without method signature
+    function () external payable {
+        allowance += msg.value;
+    }
+    
     /*
     * Getters
     */
