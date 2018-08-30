@@ -1,4 +1,10 @@
 pragma solidity 0.4.24;
+
+interface tokenInterface {
+    function transfer(address reciever, uint amount) external;
+    function balanceOf(address owner) external returns (uint256);
+}
+
 contract dapMultisig {
 
     /*
@@ -12,6 +18,15 @@ contract dapMultisig {
         TxnStatus status;
         address[] confirmed;
         address creator;
+    }
+    
+    struct tokenTransaction {
+        uint id;
+        tokenInterface token;
+        address reciever;
+        uint256 value;
+        address[] confirmed;
+        TxnStatus status;
     }
     
     struct Log {
@@ -43,17 +58,19 @@ contract dapMultisig {
     event TxnSumbitted(uint id);
     event TxnConfirmed(uint id);
     event topUpBalance(uint value);
-
+    event tokenTxnConfirmed(uint id, address owner);
+    event tokenTxnExecuted(address token, uint256 value, address reciever);
     /*
     * Storage
     */
-    bytes32 name;
-    address creator;
-    uint allowance;
-    address[] owners;
+    bytes32 public name;
+    address public creator;
+    uint public allowance;
+    address[] public owners;
     Log[] logs;
     Transaction[] transactions;
-    uint appovalsreq;
+    tokenTransaction[] tokenTransactions;
+    uint public approvalsreq;
     
     /*
     * Constructor
@@ -69,7 +86,7 @@ contract dapMultisig {
         creator = msg.sender;
         allowance = msg.value;
         owners = _owners;
-        appovalsreq = _approvals;
+        approvalsreq = _approvals;
         emit WalletCreated(msg.sender, _owners);
     }
 
@@ -143,7 +160,7 @@ contract dapMultisig {
         require(!f);
         txn.confirmed.push(msg.sender);
         
-        if (txn.confirmed.length == appovalsreq){
+        if (txn.confirmed.length == approvalsreq){
             txn.status = TxnStatus.Pending;
         }
         
@@ -177,5 +194,62 @@ contract dapMultisig {
 
         return true;
         
+    }
+    
+    function submitTokenTransaction(address _tokenAddress, address _receiever, uint256 _value) onlyOwner() external returns (bool) {
+        uint newTxId = tokenTransactions.length++;
+        tokenTransactions[newTxId].id = newTxId;
+        tokenTransactions[newTxId].token = tokenInterface(_tokenAddress);
+        tokenTransactions[newTxId].reciever = _receiever;
+        tokenTransactions[newTxId].value = _value;
+        emit TxnSumbitted(newTxId);
+        return true;
+    }
+    
+    function confirmTokenTransaction(uint txId) onlyOwner() external returns (bool){
+        tokenTransaction storage txn = tokenTransactions[txId];
+
+        //check whether this owner has already confirmed this txn
+        bool f;
+        for (uint8 i = 0; i<txn.confirmed.length;i++){
+            if (txn.confirmed[i] == msg.sender){
+                f = true;
+            }
+        }
+        //push sender address into confirmed array if haven't found
+        require(!f);
+        txn.confirmed.push(msg.sender);
+        
+        if (txn.confirmed.length == approvalsreq){
+            txn.status = TxnStatus.Pending;
+        }
+        
+        //fire event
+        emit tokenTxnConfirmed(txId, msg.sender);
+        
+        return true;
+    }
+    
+    function executeTokenTxn(uint txId) onlyOwner() external returns (bool){
+        
+        tokenTransaction storage txn = tokenTransactions[txId];
+        
+        /* check txn status */
+        require(txn.status == TxnStatus.Pending);
+        
+        /* check whether wallet has sufficient balance to send this transaction */
+        uint256 balance = txn.token.balanceOf(address(this));
+        require (txn.value >= balance);
+        
+        /* Send tokens */
+        txn.token.transfer(txn.reciever, txn.value);
+        
+        /* change transaction's status to executed */
+        txn.status = TxnStatus.Executed;
+        
+        /* Fire event */
+        emit tokenTxnExecuted(address(txn.token), txn.value, txn.reciever);
+       
+        return true;
     }
 }
