@@ -27,6 +27,7 @@ contract dapMultisig {
         uint256 value;
         address[] confirmed;
         TxnStatus status;
+        address creator;
     }
     
     struct Log {
@@ -118,6 +119,15 @@ contract dapMultisig {
     
     function getLog(uint logId) external view returns (address, uint){
         return(logs[logId].sender, logs[logId].amount);
+    }
+    
+    function getTokenTxnNum() external view returns (uint){
+        return tokenTransactions.length;
+    }
+    
+    function getTokenTxn(uint _id) external view returns(uint, address, address, uint256, address[], TxnStatus, address){
+        tokenTransaction storage txn = tokenTransactions[_id];
+        return (txn.id, txn.token, txn.reciever, txn.value, txn.confirmed, txn.status, txn.creator);
     }
     
     /*
