@@ -24,7 +24,7 @@ contract dapMultisig {
         uint id;
         tokenInterface token;
         address reciever;
-        uint256 value;
+        uint value;
         address[] confirmed;
         TxnStatus status;
         address creator;
@@ -152,6 +152,7 @@ contract dapMultisig {
         transactions[newTxId].value = _value;
         transactions[newTxId].data = _data;
         transactions[newTxId].creator = msg.sender;
+        transactions[newTxId].confirmed.push(msg.sender);
         emit TxnSumbitted(newTxId);
         return true;
     }
@@ -206,12 +207,13 @@ contract dapMultisig {
         
     }
     
-    function submitTokenTransaction(address _tokenAddress, address _receiever, uint256 _value) onlyOwner() external returns (bool) {
+    function submitTokenTransaction(address _tokenAddress, address _receiever, uint _value) onlyOwner() external returns (bool) {
         uint newTxId = tokenTransactions.length++;
         tokenTransactions[newTxId].id = newTxId;
         tokenTransactions[newTxId].token = tokenInterface(_tokenAddress);
         tokenTransactions[newTxId].reciever = _receiever;
         tokenTransactions[newTxId].value = _value;
+        tokenTransactions[newTxId].confirmed.push(msg.sender);
         emit TxnSumbitted(newTxId);
         return true;
     }
@@ -249,7 +251,7 @@ contract dapMultisig {
         
         /* check whether wallet has sufficient balance to send this transaction */
         uint256 balance = txn.token.balanceOf(address(this));
-        require (txn.value >= balance);
+        require (txn.value <= balance);
         
         /* Send tokens */
         txn.token.transfer(txn.reciever, txn.value);
