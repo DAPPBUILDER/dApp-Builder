@@ -153,6 +153,9 @@ contract dapMultisig {
         transactions[newTxId].data = _data;
         transactions[newTxId].creator = msg.sender;
         transactions[newTxId].confirmed.push(msg.sender);
+        if (transactions[newTxId].confirmed.length == approvalsreq){
+            transactions[newTxId].status = TxnStatus.Pending;
+        }
         emit TxnSumbitted(newTxId);
         return true;
     }
@@ -214,6 +217,9 @@ contract dapMultisig {
         tokenTransactions[newTxId].reciever = _receiever;
         tokenTransactions[newTxId].value = _value;
         tokenTransactions[newTxId].confirmed.push(msg.sender);
+        if (tokenTransactions[newTxId].confirmed.length == approvalsreq){
+            tokenTransactions[newTxId].status = TxnStatus.Pending;
+        }
         emit TxnSumbitted(newTxId);
         return true;
     }
