@@ -241,6 +241,11 @@ contract dapBetting {
         return (foundBet.person, foundBet.bidName, foundBet.amount);
     }
     
+    /*
+     * If you are reading this contract as example for creating custom dApps on dApp Builder platform,
+     * pay attention, that you must add the same function to your smart contract,
+     * but it must be named not getEventId, but getDappId
+     */
     function getEventId(address creator, bytes32 eventName) external view returns (uint, bool){
         for (uint i=0;i<betEvents[creator].length;i++){
             if(betEvents[creator][i].name == eventName){
